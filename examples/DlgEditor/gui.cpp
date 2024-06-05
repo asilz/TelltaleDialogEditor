@@ -58,12 +58,57 @@ int renderSymbol(struct TreeNode *node, uint32_t flags)
 
 int renderString(struct TreeNode *node, uint32_t flags)
 {
-    char stringBuffer[128];
-    if (node->dataSize < sizeof(node->data))
+    char stringBuffer[512];
+    if (node->dataSize <= sizeof(node->data))
     {
-        return ImGui::InputText("String", (char *)(node->data.staticBuffer + 4), 4 /**(uint32_t *)(node->data.staticBuffer)*/);
+        memcpy(stringBuffer, (char *)(node->data.staticBuffer + 4), node->dataSize - 4);
     }
-    return ImGui::InputText("String", (char *)(node->data.dynamicBuffer + 4), *(uint32_t *)(node->data.dynamicBuffer));
+    else
+    {
+        memcpy(stringBuffer, (char *)(node->data.dynamicBuffer + 4), node->dataSize - 4);
+    }
+    stringBuffer[node->dataSize - 4] = '\0';
+    ImGui::InputText("String", stringBuffer, 256 /**(uint32_t *)(node->data.staticBuffer)*/);
+    size_t stringLength = strlen(stringBuffer);
+    if (node->dataSize <= sizeof(node->data) && stringLength + 4 > sizeof(node->data))
+    {
+        node->dataSize = stringLength + 4;
+        node->data.dynamicBuffer = (uint8_t *)malloc(node->dataSize);
+        *(uint32_t *)node->data.dynamicBuffer = stringLength;
+        memcpy(node->data.dynamicBuffer + 4, stringBuffer, stringLength);
+    }
+    else if (node->dataSize > sizeof(node->data) && stringLength + 4 <= sizeof(node->data))
+    {
+        printf("debug\n");
+        node->dataSize = stringLength + 4;
+        free(node->data.dynamicBuffer);
+        printf("debug\n");
+        *(uint32_t *)node->data.staticBuffer = stringLength;
+        memcpy(node->data.staticBuffer + 4, stringBuffer, stringLength);
+        printf("debug\n");
+    }
+    else if (node->dataSize > sizeof(node->data) && stringLength + 4 > sizeof(node->data))
+    {
+        node->dataSize = stringLength + 4;
+        free(node->data.dynamicBuffer);
+        node->data.dynamicBuffer = (uint8_t *)malloc(stringLength + 4);
+        *(uint32_t *)node->data.dynamicBuffer = stringLength;
+        memcpy(node->data.dynamicBuffer + 4, stringBuffer, stringLength);
+    }
+    else if (node->dataSize <= sizeof(node->data) && stringLength + 4 <= sizeof(node->data))
+    {
+        printf("debug2\n");
+        node->dataSize = stringLength + 4;
+        *(uint32_t *)node->data.staticBuffer = stringLength;
+        memcpy(node->data.staticBuffer + 4, stringBuffer, stringLength);
+    }
+    return 0;
+    // return ImGui::InputText("String", (char *)(node->data.dynamicBuffer + 4), *(uint32_t *)(node->data.dynamicBuffer));
+}
+
+int renderVector3(struct TreeNode *node, uint32_t flags)
+{
+    return ImGui::InputFloat3("Vector3", (float *)(node->data.dynamicBuffer));
 }
 
 int renderNode(struct TreeNode *node, int uniqueID, uint32_t flags)
