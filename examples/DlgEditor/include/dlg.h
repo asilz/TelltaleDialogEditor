@@ -14,6 +14,7 @@ int DlgNodeTextRead(FILE *stream, struct TreeNode *node, uint32_t flags);
 int DlgNodeExchangeRead(FILE *stream, struct TreeNode *node, uint32_t flags);
 int DlgNodeChoicesRead(FILE *stream, struct TreeNode *node, uint32_t flags);
 int DlgChoiceRead(FILE *stream, struct TreeNode *node, uint32_t flags);
+int DlgNodeChoreRead(FILE *stream, struct TreeNode *node, uint32_t flags);
 int DlgNodeWaitRead(FILE *stream, struct TreeNode *node, uint32_t flags);
 int DlgNodeMarkerRead(FILE *stream, struct TreeNode *node, uint32_t flags);
 int DlgNodeIdleRead(FILE *stream, struct TreeNode *node, uint32_t flags);
@@ -50,4 +51,5 @@ int DlgChildSetRead(FILE *stream, struct TreeNode *node, uint32_t flags);
 int LogicItemRead(FILE *stream, struct TreeNode *logicItem, uint32_t flags);
 int ScriptEnumRead(FILE *stream, struct TreeNode *node, uint32_t flags);
 int AnimOrChoreRead(FILE *stream, struct TreeNode *node, uint32_t flags);
+int Vector3Read(FILE *stream, struct TreeNode *node, uint32_t flags);
 #endif

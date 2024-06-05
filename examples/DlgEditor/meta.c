@@ -1088,10 +1088,28 @@ int initializeMetaClassDescriptions()
     metaClassDescriptions[int32_type].read = intrinsic4Read;
     metaClassDescriptions[LanguageResProxy].read = intrinsic4Read;
     metaClassDescriptions[float_type].read = intrinsic4Read;
-    metaClassDescriptions[ScriptEnumDialogMode].read = ScriptEnumRead;
-    metaClassDescriptions[ScriptEnumReticleActions].read = ScriptEnumRead;
     metaClassDescriptions[String].read = StringRead;
     metaClassDescriptions[AnimOrChore].read = AnimOrChoreRead;
+    metaClassDescriptions[Vector3].read = Vector3Read;
+
+    /* ScriptEnum */
+    metaClassDescriptions[ScriptEnumAIAgentState].read = ScriptEnumRead;
+    metaClassDescriptions[ScriptEnumAIDummyPos].read = ScriptEnumRead;
+    metaClassDescriptions[ScriptEnumAIPatrolType].read = ScriptEnumRead;
+    metaClassDescriptions[ScriptEnumBlendTypes].read = ScriptEnumRead;
+    metaClassDescriptions[ScriptEnumControllerButtons].read = ScriptEnumRead;
+    metaClassDescriptions[ScriptEnumDialogMode].read = ScriptEnumRead;
+    metaClassDescriptions[ScriptEnumGamepadButton].read = ScriptEnumRead;
+    metaClassDescriptions[ScriptEnumLightComposerCameraZone].read = ScriptEnumRead;
+    metaClassDescriptions[ScriptEnumLightComposerLightSourceQuadrant].read = ScriptEnumRead;
+    metaClassDescriptions[ScriptEnumLightComposerNodeLocation].read = ScriptEnumRead;
+    metaClassDescriptions[ScriptEnumMenuAlignment].read = ScriptEnumRead;
+    metaClassDescriptions[ScriptEnumMenuVerticalAlignment].read = ScriptEnumRead;
+    metaClassDescriptions[ScriptEnumQTE_Type].read = ScriptEnumRead;
+    metaClassDescriptions[ScriptEnumReticleActions].read = ScriptEnumRead;
+    metaClassDescriptions[ScriptEnumReticleDisplayMode].read = ScriptEnumRead;
+    metaClassDescriptions[ScriptEnumStruggleType].read = ScriptEnumRead;
+    metaClassDescriptions[ScriptEnumUseableType].read = ScriptEnumRead;
 
     /* Handles */
 
@@ -1154,6 +1172,7 @@ int initializeMetaClassDescriptions()
     metaClassDescriptions[DlgNodeExchange].read = DlgNodeExchangeRead;
     metaClassDescriptions[DlgNodeChoices].read = DlgNodeChoicesRead;
     metaClassDescriptions[DlgChoice].read = DlgChoiceRead;
+    metaClassDescriptions[DlgNodeChore].read = DlgNodeChoreRead;
     metaClassDescriptions[DlgNodeWait].read = DlgNodeWaitRead;
     metaClassDescriptions[DlgNodeMarker].read = DlgNodeMarkerRead;
     metaClassDescriptions[DlgNodeIdle].read = DlgNodeIdleRead;
@@ -1180,10 +1199,10 @@ int initializeMetaClassDescriptions()
     metaClassDescriptions[long_type].render = renderInt4;
     metaClassDescriptions[float_type].render = renderFloat;
     metaClassDescriptions[bool_type].render = renderBool;
+    metaClassDescriptions[Vector3].render = renderVector3;
     metaClassDescriptions[Flags].render = renderInt4;
     metaClassDescriptions[LanguageResProxy].render = renderInt4;
     metaClassDescriptions[String].render = renderString;
-    metaClassDescriptions[HandleTempPropertySetLate].render = renderSymbol;
     metaClassDescriptions[UIDGenerator].render = renderInt4;
 
     /* Handles */
