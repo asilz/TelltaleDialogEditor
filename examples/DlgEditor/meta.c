@@ -6,7 +6,6 @@
 #include <types.h>
 #include <string.h>
 #include <intrinsic.h>
-#include <ttarch.h>
 #include <tree.h>
 #include <dlg.h>
 #include <ttstring.h>
@@ -57,46 +56,6 @@ void writeMetaStreamHeader(FILE *stream, struct MetaStreamHeader *header)
     }
 }
 
-void readMetaStream(FILE *stream, struct MetaStreamHeader *header)
-{
-    readMetaStreamHeader(stream, header);
-
-    if ((int32_t)header->defaultSize < 0)
-    {
-        uint32_t defaultStart = ftell(stream);
-        streamDecrypt(&stream);
-        header->defaultSize = ftell(stream) - defaultStart;
-    }
-    else
-    {
-        fseek(stream, header->defaultSize, SEEK_CUR);
-    }
-
-    if ((int32_t)header->debugSize < 0)
-    {
-        uint32_t debugStart = ftell(stream);
-        streamDecrypt(&stream);
-        header->debugSize = ftell(stream) - debugStart;
-    }
-    else
-    {
-        fseek(stream, header->debugSize, SEEK_CUR);
-    }
-
-    if ((int32_t)header->asyncSize < 0)
-    {
-        uint32_t asyncStart = ftell(stream);
-        streamDecrypt(&stream);
-        header->asyncSize = ftell(stream) - asyncStart;
-    }
-    else
-    {
-        fseek(stream, header->asyncSize, SEEK_CUR);
-    }
-
-    fseek(stream, (-((int64_t)header->defaultSize + (int64_t)header->debugSize + (int64_t)header->asyncSize)), SEEK_CUR); // Seeks back to the end of header
-}
-
 int readMetaClass(FILE *stream, struct TreeNode *node, uint32_t flags)
 {
     enum Type type = searchDatabase("database/protonDatabase.db", node->typeSymbol);
@@ -105,6 +64,7 @@ int readMetaClass(FILE *stream, struct TreeNode *node, uint32_t flags)
     if (readFunction == NULL)
     {
         printf("Error: Read function not implemented for %s type = %lx\n", metaClassDescriptions[type].name, node->typeSymbol);
+        exit(-1);
         return -1;
     }
     return metaClassDescriptions[type].read(stream, node, flags);
@@ -1132,7 +1092,60 @@ int initializeMetaClassDescriptions()
     metaClassDescriptions[ScriptEnumReticleActions].read = ScriptEnumRead;
     metaClassDescriptions[String].read = StringRead;
     metaClassDescriptions[AnimOrChore].read = AnimOrChoreRead;
+
+    /* Handles */
+
     metaClassDescriptions[HandleTempD3DMeshLate].read = intrinsic8Read;
+    metaClassDescriptions[HandleTempActorAgentMapperLate].read = intrinsic8Read;
+    metaClassDescriptions[HandleTempAgentMapLate].read = intrinsic8Read;
+    metaClassDescriptions[HandleTempAnimationLate].read = intrinsic8Read;
+    metaClassDescriptions[HandleTempAnimOrChoreLate].read = intrinsic8Read;
+    metaClassDescriptions[HandleTempAudioDataLate].read = intrinsic8Read;
+    metaClassDescriptions[HandleTempBlendGraphLate].read = intrinsic8Read;
+    metaClassDescriptions[HandleTempBlendGraphManagerLate].read = intrinsic8Read;
+    metaClassDescriptions[HandleTempBlendModeLate].read = intrinsic8Read;
+    metaClassDescriptions[HandleTempChoreLate].read = intrinsic8Read;
+    metaClassDescriptions[HandleTempD3DMeshLate].read = intrinsic8Read;
+    metaClassDescriptions[HandleTempDialogResourceLate].read = intrinsic8Read;
+    metaClassDescriptions[HandleTempDlgLate].read = intrinsic8Read;
+    metaClassDescriptions[HandleTempEventStorageLate].read = intrinsic8Read;
+    metaClassDescriptions[HandleTempFontLate].read = intrinsic8Read;
+    metaClassDescriptions[HandleTempInputMapperLate].read = intrinsic8Read;
+    metaClassDescriptions[HandleTempLanguageDatabaseLate].read = intrinsic8Read;
+    metaClassDescriptions[HandleTempLanguageResourceLate].read = intrinsic8Read;
+    metaClassDescriptions[HandleTempLightProbeDataLate].read = intrinsic8Read;
+    metaClassDescriptions[HandleTempLocomotionDBLate].read = intrinsic8Read;
+    metaClassDescriptions[HandleTempParticlePropertiesLate].read = intrinsic8Read;
+    metaClassDescriptions[HandleTempParticleSpriteLate].read = intrinsic8Read;
+    metaClassDescriptions[HandleTempPhonemeTableLate].read = intrinsic8Read;
+    metaClassDescriptions[HandleTempPhysicsDataLate].read = intrinsic8Read;
+    metaClassDescriptions[HandleTempPhysicsObjectLate].read = intrinsic8Read;
+    metaClassDescriptions[HandleTempPreloadPackageRuntimeDataDialogLate].read = intrinsic8Read;
+    metaClassDescriptions[HandleTempPreloadPackageRuntimeDataSceneLate].read = intrinsic8Read;
+    metaClassDescriptions[HandleTempPropertySetLate].read = intrinsic8Read;
+    metaClassDescriptions[HandleTempResourceBundleLate].read = intrinsic8Read;
+    metaClassDescriptions[HandleTempResourceGroupInfoLate].read = intrinsic8Read;
+    metaClassDescriptions[HandleTempRuleLate].read = intrinsic8Read;
+    metaClassDescriptions[HandleTempRulesLate].read = intrinsic8Read;
+    metaClassDescriptions[HandleTempSaveGameLate].read = intrinsic8Read;
+    metaClassDescriptions[HandleTempSceneLate].read = intrinsic8Read;
+    metaClassDescriptions[HandleTempSkeletonLate].read = intrinsic8Read;
+    metaClassDescriptions[HandleTempSoundAmbienceAmbienceDefinitionLate].read = intrinsic8Read;
+    metaClassDescriptions[HandleTempSoundBusSnapshotSnapshotLate].read = intrinsic8Read;
+    metaClassDescriptions[HandleTempSoundBusSnapshotSnapshotSuiteLate].read = intrinsic8Read;
+    metaClassDescriptions[HandleTempSoundDataLate].read = intrinsic8Read;
+    metaClassDescriptions[HandleTempSoundEventBankDummyLate].read = intrinsic8Read;
+    metaClassDescriptions[HandleTempSoundEventDataLate].read = intrinsic8Read;
+    metaClassDescriptions[HandleTempSoundEventSnapshotDataLate].read = intrinsic8Read;
+    metaClassDescriptions[HandleTempSoundReverbDefinitionLate].read = intrinsic8Read;
+    metaClassDescriptions[HandleTempStyleGuideLate].read = intrinsic8Read;
+    metaClassDescriptions[HandleTempStyleGuideRefLate].read = intrinsic8Read;
+    metaClassDescriptions[HandleTempStyleIdleTransitionsResLate].read = intrinsic8Read;
+    metaClassDescriptions[HandleTempT3OverlayDataLate].read = intrinsic8Read;
+    metaClassDescriptions[HandleTempT3TextureLate].read = intrinsic8Read;
+    metaClassDescriptions[HandleTempTransitionMapLate].read = intrinsic8Read;
+    metaClassDescriptions[HandleTempVoiceDataLate].read = intrinsic8Read;
+    metaClassDescriptions[HandleTempWalkBoxesLate].read = intrinsic8Read;
 
     /* Dlg Functions */
 
@@ -1172,7 +1185,59 @@ int initializeMetaClassDescriptions()
     metaClassDescriptions[String].render = renderString;
     metaClassDescriptions[HandleTempPropertySetLate].render = renderSymbol;
     metaClassDescriptions[UIDGenerator].render = renderInt4;
+
+    /* Handles */
+    metaClassDescriptions[HandleTempD3DMeshLate].render = renderSymbol;
+    metaClassDescriptions[HandleTempActorAgentMapperLate].render = renderSymbol;
+    metaClassDescriptions[HandleTempAgentMapLate].render = renderSymbol;
+    metaClassDescriptions[HandleTempAnimationLate].render = renderSymbol;
+    metaClassDescriptions[HandleTempAnimOrChoreLate].render = renderSymbol;
+    metaClassDescriptions[HandleTempAudioDataLate].render = renderSymbol;
+    metaClassDescriptions[HandleTempBlendGraphLate].render = renderSymbol;
+    metaClassDescriptions[HandleTempBlendGraphManagerLate].render = renderSymbol;
+    metaClassDescriptions[HandleTempBlendModeLate].render = renderSymbol;
     metaClassDescriptions[HandleTempChoreLate].render = renderSymbol;
+    metaClassDescriptions[HandleTempD3DMeshLate].render = renderSymbol;
+    metaClassDescriptions[HandleTempDialogResourceLate].render = renderSymbol;
+    metaClassDescriptions[HandleTempDlgLate].render = renderSymbol;
+    metaClassDescriptions[HandleTempEventStorageLate].render = renderSymbol;
+    metaClassDescriptions[HandleTempFontLate].render = renderSymbol;
+    metaClassDescriptions[HandleTempInputMapperLate].render = renderSymbol;
+    metaClassDescriptions[HandleTempLanguageDatabaseLate].render = renderSymbol;
+    metaClassDescriptions[HandleTempLanguageResourceLate].render = renderSymbol;
+    metaClassDescriptions[HandleTempLightProbeDataLate].render = renderSymbol;
+    metaClassDescriptions[HandleTempLocomotionDBLate].render = renderSymbol;
+    metaClassDescriptions[HandleTempParticlePropertiesLate].render = renderSymbol;
+    metaClassDescriptions[HandleTempParticleSpriteLate].render = renderSymbol;
+    metaClassDescriptions[HandleTempPhonemeTableLate].render = renderSymbol;
+    metaClassDescriptions[HandleTempPhysicsDataLate].render = renderSymbol;
+    metaClassDescriptions[HandleTempPhysicsObjectLate].render = renderSymbol;
+    metaClassDescriptions[HandleTempPreloadPackageRuntimeDataDialogLate].render = renderSymbol;
+    metaClassDescriptions[HandleTempPreloadPackageRuntimeDataSceneLate].render = renderSymbol;
+    metaClassDescriptions[HandleTempPropertySetLate].render = renderSymbol;
+    metaClassDescriptions[HandleTempResourceBundleLate].render = renderSymbol;
+    metaClassDescriptions[HandleTempResourceGroupInfoLate].render = renderSymbol;
+    metaClassDescriptions[HandleTempRuleLate].render = renderSymbol;
+    metaClassDescriptions[HandleTempRulesLate].render = renderSymbol;
+    metaClassDescriptions[HandleTempSaveGameLate].render = renderSymbol;
+    metaClassDescriptions[HandleTempSceneLate].render = renderSymbol;
+    metaClassDescriptions[HandleTempSkeletonLate].render = renderSymbol;
+    metaClassDescriptions[HandleTempSoundAmbienceAmbienceDefinitionLate].render = renderSymbol;
+    metaClassDescriptions[HandleTempSoundBusSnapshotSnapshotLate].render = renderSymbol;
+    metaClassDescriptions[HandleTempSoundBusSnapshotSnapshotSuiteLate].render = renderSymbol;
+    metaClassDescriptions[HandleTempSoundDataLate].render = renderSymbol;
+    metaClassDescriptions[HandleTempSoundEventBankDummyLate].render = renderSymbol;
+    metaClassDescriptions[HandleTempSoundEventDataLate].render = renderSymbol;
+    metaClassDescriptions[HandleTempSoundEventSnapshotDataLate].render = renderSymbol;
+    metaClassDescriptions[HandleTempSoundReverbDefinitionLate].render = renderSymbol;
+    metaClassDescriptions[HandleTempStyleGuideLate].render = renderSymbol;
+    metaClassDescriptions[HandleTempStyleGuideRefLate].render = renderSymbol;
+    metaClassDescriptions[HandleTempStyleIdleTransitionsResLate].render = renderSymbol;
+    metaClassDescriptions[HandleTempT3OverlayDataLate].render = renderSymbol;
+    metaClassDescriptions[HandleTempT3TextureLate].render = renderSymbol;
+    metaClassDescriptions[HandleTempTransitionMapLate].render = renderSymbol;
+    metaClassDescriptions[HandleTempVoiceDataLate].render = renderSymbol;
+    metaClassDescriptions[HandleTempWalkBoxesLate].render = renderSymbol;
 
     metaClassDescriptions[DlgObjID].render = renderSymbol;
 

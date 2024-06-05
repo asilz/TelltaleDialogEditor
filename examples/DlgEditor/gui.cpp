@@ -94,7 +94,7 @@ DlgApplication::DlgApplication(const char *name, FILE *inputStream) : Applicatio
     initializeMetaClassDescriptions();
     dlg.dataSize = 0;
 
-    readMetaStream(inputStream, &(this->header));
+    readMetaStreamHeader(inputStream, &(this->header));
     DlgRead(inputStream, &(this->dlg), 0);
     fclose(inputStream);
 

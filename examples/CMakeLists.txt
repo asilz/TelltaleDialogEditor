@@ -12,12 +12,8 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 list(APPEND CMAKE_MODULE_PATH ${IMGUI_NODE_EDITOR_ROOT_DIR}/misc/cmake-modules)
 
 # Node editor use C++14
-set(CMAKE_CXX_STANDARD            14)
-set(CMAKE_CXX_STANDARD_REQUIRED   YES)
-
-
-
-
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED YES)
 
 # Macro that will configure an example application
 macro(add_example_executable name)
@@ -27,15 +23,16 @@ macro(add_example_executable name)
         ${ARGN}
     )
 
-    #source_group("" FILES ${_Example_Sources})
+    # source_group("" FILES ${_Example_Sources})
     source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${_Example_Sources})
 
     file(GLOB _Example_CommonResources CONFIGURE_DEPENDS "${IMGUI_NODE_EDITOR_ROOT_DIR}/examples/data/*")
     file(GLOB _Example_Resources CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/data/*")
-    #message(FATAL_ERROR "_Example_Resources = ${_Example_Resources}")
 
+    # message(FATAL_ERROR "_Example_Resources = ${_Example_Resources}")
     set(_Example_Type)
-    if (WIN32)
+
+    if(WIN32)
         set(_Example_Type WIN32)
 
         set(ApplicationIcon ${IMGUI_NODE_EDITOR_ROOT_DIR}/examples/Application/Support/Icon.ico)
@@ -52,7 +49,7 @@ macro(add_example_executable name)
             ${_Example_CommonResources}
         )
         source_group("resources" FILES ${CMAKE_CURRENT_BINARY_DIR}/Resource.rc)
-    elseif (APPLE)
+    elseif(APPLE)
         set(_Example_Type MACOSX_BUNDLE)
 
         set_source_files_properties(${_Example_Resources} ${_Example_CommonResources} PROPERTIES
@@ -65,34 +62,31 @@ macro(add_example_executable name)
         )
     endif()
 
-    
     add_executable(${name} ${_Example_Type} ${_Example_Sources} ${_Example_Resources} ${_Example_CommonResources})
-    
 
-    find_package(ZLIB REQUIRED)
     find_package(imgui REQUIRED)
     find_package(imgui_node_editor REQUIRED)
-    target_link_libraries(${name} PRIVATE imgui imgui_node_editor application ZLIB::ZLIB)
+    target_link_libraries(${name} PRIVATE imgui imgui_node_editor application)
 
     set(_ExampleBinDir ${CMAKE_BINARY_DIR}/bin)
 
     set_target_properties(${name} PROPERTIES
         FOLDER "examples"
-        RUNTIME_OUTPUT_DIRECTORY                "${_ExampleBinDir}"
-        RUNTIME_OUTPUT_DIRECTORY_DEBUG          "${_ExampleBinDir}"
+        RUNTIME_OUTPUT_DIRECTORY "${_ExampleBinDir}"
+        RUNTIME_OUTPUT_DIRECTORY_DEBUG "${_ExampleBinDir}"
         RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO "${_ExampleBinDir}"
-        RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL     "${_ExampleBinDir}"
-        RUNTIME_OUTPUT_DIRECTORY_RELEASE        "${_ExampleBinDir}"
-        DEBUG_POSTFIX                           _d
-        RELWITHDEBINGO_POSTFIX                  _rd
-        MINSIZEREL_POSTFIX                      _r
-        VS_DEBUGGER_WORKING_DIRECTORY           ${_ExampleBinDir}
-        MACOSX_BUNDLE_INFO_PLIST                "${IMGUI_NODE_EDITOR_ROOT_DIR}/examples/application/support/Info.plist.in"
-        MACOSX_BUNDLE_BUNDLE_NAME               "${PACKAGE_NAME}"
-        MACOSX_BUNDLE_GUI_IDENTIFIER            "com.sandbox.collisions"
-        MACOSX_BUNDLE_LONG_VERSION_STRING       "${PACKAGE_VERSION}"
-        MACOSX_BUNDLE_SHORT_VERSION_STRING      "${PACKAGE_VERSION_MAJOR}.${PACKAGE_VERSION_MINOR}"
-        MACOSX_BUNDLE_ICON_FILE                 Icon.icns
+        RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL "${_ExampleBinDir}"
+        RUNTIME_OUTPUT_DIRECTORY_RELEASE "${_ExampleBinDir}"
+        DEBUG_POSTFIX _d
+        RELWITHDEBINGO_POSTFIX _rd
+        MINSIZEREL_POSTFIX _r
+        VS_DEBUGGER_WORKING_DIRECTORY ${_ExampleBinDir}
+        MACOSX_BUNDLE_INFO_PLIST "${IMGUI_NODE_EDITOR_ROOT_DIR}/examples/application/support/Info.plist.in"
+        MACOSX_BUNDLE_BUNDLE_NAME "${PACKAGE_NAME}"
+        MACOSX_BUNDLE_GUI_IDENTIFIER "com.sandbox.collisions"
+        MACOSX_BUNDLE_LONG_VERSION_STRING "${PACKAGE_VERSION}"
+        MACOSX_BUNDLE_SHORT_VERSION_STRING "${PACKAGE_VERSION_MAJOR}.${PACKAGE_VERSION_MINOR}"
+        MACOSX_BUNDLE_ICON_FILE Icon.icns
     )
 
     add_custom_command(
@@ -102,8 +96,9 @@ macro(add_example_executable name)
     )
 
     set(_ResourceRoot ${CMAKE_CURRENT_SOURCE_DIR})
+
     foreach(_Resource ROOT "${IMGUI_NODE_EDITOR_ROOT_DIR}/examples/data" ${_Example_CommonResources} ROOT "${CMAKE_CURRENT_SOURCE_DIR}/data" ${_Example_Resources})
-        if (_Resource STREQUAL ROOT)
+        if(_Resource STREQUAL ROOT)
             set(_ResourceRoot FALSE)
             continue()
         elseif(NOT _ResourceRoot)
@@ -111,7 +106,7 @@ macro(add_example_executable name)
             continue()
         endif()
 
-        if ("${_Resource}" MATCHES "\.DS_Store$")
+        if("${_Resource}" MATCHES "\.DS_Store$")
             list(REMOVE_ITEM _Example_Resources ${_Resource})
             list(REMOVE_ITEM _Example_CommonResources ${_Resource})
             continue()
@@ -125,10 +120,8 @@ macro(add_example_executable name)
             COMMAND ${CMAKE_COMMAND} -E copy_if_different ARGS ${_Resource} ${_ExampleBinDir}/data/${_RelResource}
         )
     endforeach()
-
 endmacro()
 
 add_subdirectory(application)
 
 add_subdirectory(DlgEditor)
-

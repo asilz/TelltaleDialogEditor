@@ -2,11 +2,9 @@ if(UNIX)
     add_example_executable(dlgEditor
         main.cpp
         gui.cpp
-        blowfish.c
         container.c
         meta.c
         prop.c
-        ttarch.c
         ttstring.c
         intrinsic.c
         dlg.c
@@ -20,11 +18,9 @@ if(MSVC)
     add_example_executable(dlgEditor
         main.cpp
         gui.cpp
-        blowfish.c
         container.c
         meta.c
         prop.c
-        ttarch.c
         ttstring.c
         intrinsic.c
         dlg.c
