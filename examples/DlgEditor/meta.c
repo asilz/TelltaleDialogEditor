@@ -9,8 +9,8 @@
 #include <ttarch.h>
 #include <tree.h>
 #include <dlg.h>
-#include <widgets.h>
 #include <ttstring.h>
+#include <gui.h>
 
 #define META_CLASS_DESCRIPTIONS_COUNT 978
 
@@ -40,6 +40,20 @@ void readMetaStreamHeader(FILE *stream, struct MetaStreamHeader *header)
     for (uint32_t i = 0; i < header->numVersion; ++i)
     {
         fread(header->crc + i, sizeof(header->crc->typeSymbolCrc) + sizeof(header->crc->versionCrc), 1, stream);
+    }
+}
+
+void writeMetaStreamHeader(FILE *stream, struct MetaStreamHeader *header)
+{
+    fwrite(&(header->version), sizeof(header->version), 1, stream);
+    fwrite(&(header->defaultSize), sizeof(header->defaultSize), 1, stream);
+    fwrite(&(header->debugSize), sizeof(header->debugSize), 1, stream);
+    fwrite(&(header->asyncSize), sizeof(header->asyncSize), 1, stream);
+    fwrite(&(header->numVersion), sizeof(header->numVersion), 1, stream);
+
+    for (uint32_t i = 0; i < header->numVersion; ++i)
+    {
+        fwrite(header->crc + i, sizeof(header->crc->typeSymbolCrc) + sizeof(header->crc->versionCrc), 1, stream);
     }
 }
 

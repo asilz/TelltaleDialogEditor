@@ -1,7 +1,7 @@
 #ifndef TREE_H
 #define TREE_H
 #include <inttypes.h>
-
+#include <stdio.h>
 struct TreeNode
 {
     union Data
@@ -19,5 +19,6 @@ struct TreeNode
 };
 
 void treeFree(struct TreeNode *root);
+uint32_t writeTree(FILE *stream, struct TreeNode *root);
 
 #endif

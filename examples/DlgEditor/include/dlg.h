@@ -1,7 +1,12 @@
 #include <inttypes.h>
+#include <stdio.h>
 
 #ifndef DLG_H
 #define DLG_H
+
+uint64_t *DlgGetID(struct TreeNode *node);
+uint64_t *DlgGetNextID(struct TreeNode *node);
+uint64_t *DlgGetPrevID(struct TreeNode *node);
 
 int DlgRead(FILE *stream, struct TreeNode *dlg, uint32_t flags);
 int DlgNodeLogicRead(FILE *stream, struct TreeNode *node, uint32_t flags);

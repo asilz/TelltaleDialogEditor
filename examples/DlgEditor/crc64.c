@@ -100,7 +100,7 @@ enum Type searchDatabase(char *databasePath, uint64_t crc)
 {
     FILE *database = cfopen(databasePath, "rb");
     uint16_t value;
-    cfseek(database, crc % 0xFFFFFFFF, SEEK_SET);
+    cfseek(database, crc % 0xFFFFFF, SEEK_SET);
     fread(&value, 2, 1, database);
     fclose(database);
     return (enum Type)value;
@@ -130,7 +130,7 @@ void writeDatabase()
             }
             buffer[j] = byte;
         }
-        cfseek(database, CRC64_CaseInsensitive(0, buffer) % 0xFFFFFFFF, SEEK_SET);
+        cfseek(database, CRC64_CaseInsensitive(0, buffer) % 0xFFFFFF, SEEK_SET);
         fwrite(&i, sizeof(i), 1, database);
     }
     fclose(database);
