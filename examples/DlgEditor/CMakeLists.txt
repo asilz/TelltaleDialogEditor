@@ -1,7 +1,7 @@
 if(UNIX)
     add_example_executable(dlgEditor
-        widgets.cpp
         main.cpp
+        gui.cpp
         blowfish.c
         container.c
         meta.c
@@ -18,8 +18,8 @@ endif(UNIX)
 
 if(MSVC)
     add_example_executable(dlgEditor
-        widgets.cpp
         main.cpp
+        gui.cpp
         blowfish.c
         container.c
         meta.c
