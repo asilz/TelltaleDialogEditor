@@ -68,7 +68,7 @@ int renderString(struct TreeNode *node, uint32_t flags)
         memcpy(stringBuffer, (char *)(node->data.dynamicBuffer + 4), node->dataSize - 4);
     }
     stringBuffer[node->dataSize - 4] = '\0';
-    ImGui::InputText("String", stringBuffer, 256 /**(uint32_t *)(node->data.staticBuffer)*/);
+    ImGui::InputText("String", stringBuffer, 512);
     size_t stringLength = strlen(stringBuffer);
     if (node->dataSize <= sizeof(node->data) && stringLength + 4 > sizeof(node->data))
     {
