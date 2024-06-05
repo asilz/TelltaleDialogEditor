@@ -25,7 +25,7 @@ int Main(int argc, char **argv)
 
     if (argc == 3)
     {
-        FILE *outputStream = fopen(argv[2], "wb");
+        FILE *outputStream = cfopen(argv[2], "wb");
         printf("argc %d\n", argc);
         writeMetaStreamHeader(outputStream, &(exampe.header));
         writeTree(outputStream, &(exampe.dlg));
