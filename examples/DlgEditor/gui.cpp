@@ -79,13 +79,10 @@ int renderString(struct TreeNode *node, uint32_t flags)
     }
     else if (node->dataSize > sizeof(node->data) && stringLength + 4 <= sizeof(node->data))
     {
-        printf("debug\n");
         node->dataSize = stringLength + 4;
         free(node->data.dynamicBuffer);
-        printf("debug\n");
         *(uint32_t *)node->data.staticBuffer = stringLength;
         memcpy(node->data.staticBuffer + 4, stringBuffer, stringLength);
-        printf("debug\n");
     }
     else if (node->dataSize > sizeof(node->data) && stringLength + 4 > sizeof(node->data))
     {
@@ -97,7 +94,6 @@ int renderString(struct TreeNode *node, uint32_t flags)
     }
     else if (node->dataSize <= sizeof(node->data) && stringLength + 4 <= sizeof(node->data))
     {
-        printf("debug2\n");
         node->dataSize = stringLength + 4;
         *(uint32_t *)node->data.staticBuffer = stringLength;
         memcpy(node->data.staticBuffer + 4, stringBuffer, stringLength);
