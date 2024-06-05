@@ -32,6 +32,8 @@ int Main(int argc, char **argv)
         fclose(outputStream);
     }
 
+    treeFree(&exampe.dlg);
+
     return ret;
 
     return 0;
