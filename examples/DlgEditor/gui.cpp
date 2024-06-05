@@ -92,6 +92,7 @@ int renderNode(struct TreeNode *node, int uniqueID, uint32_t flags)
 DlgApplication::DlgApplication(const char *name, FILE *inputStream) : Application(name)
 {
     initializeMetaClassDescriptions();
+    dlg.dataSize = 0;
 
     readMetaStream(inputStream, &(this->header));
     DlgRead(inputStream, &(this->dlg), 0);
