@@ -104,7 +104,12 @@ int renderString(struct TreeNode *node, uint32_t flags)
 
 int renderVector3(struct TreeNode *node, uint32_t flags)
 {
-    return ImGui::InputFloat3("Vector3", (float *)(node->data.dynamicBuffer));
+    return ImGui::InputFloat3("xyz", (float *)(node->data.dynamicBuffer));
+}
+
+int renderColor(struct TreeNode *node, uint32_t flags)
+{
+    return ImGui::InputFloat4("rgba", (float *)(node->data.dynamicBuffer));
 }
 
 int renderNode(struct TreeNode *node, int uniqueID, uint32_t flags)
@@ -144,8 +149,8 @@ DlgApplication::DlgApplication(const char *name, FILE *inputStream) : Applicatio
 
 void DlgApplication::CreateLinks()
 {
-    m_Links.reserve(500);
-    m_Nodes.reserve(1000);
+    m_Links.reserve(1000);
+    m_Nodes.reserve(2000);
     /* Iteration through all children in each folder */
     for (uint32_t i = 1; i < *(uint64_t *)(dlg.children[13]->children[0]->data.staticBuffer); ++i)
     {
@@ -177,7 +182,7 @@ void DlgApplication::CreateLinks()
                 AddNextLinks(child);
             }
         }
-        else if (node->typeSymbol == 0x789758cb1a8d6628 || node->typeSymbol == 0x36e367b48ad63274) // DlgNodeConditional || DlgNodeSequence
+        else if (node->typeSymbol == 0x789758cb1a8d6628 || node->typeSymbol == 0x36e367b48ad63274 || node->typeSymbol == 0x97ba9139ccc1cf26) // DlgNodeConditional || DlgNodeSequence || DlgNodeParallel
         {
             for (uint32_t j = 1; j < *(uint64_t *)(node->children[1]->children[0]->children[0]->data.staticBuffer); ++j)
             {
@@ -316,169 +321,6 @@ void DlgApplication::OnFrame(float deltaTime)
         }
         nodeX += 550;
     }
-    // Headers and Trees Demo =======================================================================================================
-    // TreeNodes and Headers streatch to the entire remaining work area. To put them in nodes what we need to do is to tell
-    // ImGui out work area is shorter. We can achieve that right now only by using columns API.
-    //
-    // Relevent bugs: https://github.com/thedmd/imgui-node-editor/issues/30
-
-    /*
-    for (uint32_t i = 1; i < *(uint64_t *)(dlg.children[13]->children[0]->data.staticBuffer); ++i)
-    {
-        for (uint32_t j = 1; j < *(uint64_t *)(dlg.children[13]->children[i]->children[2]->children[0]->data.staticBuffer); ++j)
-        {
-            TreeNode *node = dlg.children[13]->children[i]->children[2]->children[j];
-
-            char textBuffer[128];
-            uint64_t nodeID = DlgGetID(node);
-
-            // printf("hi\n");
-
-            ed::BeginNode(nodeID);
-            char *metaClassName = getMetaClassName(node->typeSymbol);
-            ImGui::Text(metaClassName);
-
-            float width = 450; // bad magic numbers. used to define width of tree widget
-            // Pins Row
-            ed::BeginPin(nodeID - 1, ed::PinKind::Input);
-            ImGui::Text("-> prev");
-            ed::EndPin();
-            ImGui::SameLine();
-            ImGui::Dummy(ImVec2(width / 2 + width / 4, 0)); //  magic number - Crude & simple way to nudge over the output pin. Consider using layout and springs
-            ImGui::SameLine();
-            ed::BeginPin(nodeID + 1, ed::PinKind::Output);
-            ImGui::Text("next ->");
-            ed::EndPin();
-
-            // Tree column startup -------------------------------------------------------------------
-            // Push dummy widget to extend node size. Columns do not do that.
-            ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0.0f, 0.0f));
-            ImGui::Dummy(ImVec2(width, 0));
-            ImGui::PopStyleVar();
-
-            // Start columns, but use only first one.
-            sprintf(textBuffer, "##%s%ld", metaClassName, j + i * (*(uint64_t *)(dlg.children[13]->children[0]->data.staticBuffer)));
-            ImGui::BeginColumns(textBuffer, 2,
-                                ImGuiOldColumnFlags_NoBorder |
-                                    ImGuiOldColumnFlags_NoResize |
-                                    ImGuiOldColumnFlags_NoPreserveWidths |
-                                    ImGuiOldColumnFlags_NoForceWithinWindow);
-
-            // Adjust column width to match requested one.
-            ImGui::SetColumnWidth(0, width + ImGui::GetStyle().WindowPadding.x + ImGui::GetStyle().ItemSpacing.x);
-            // End of tree column startup --------------------------------------------------------------
-
-            // Back to normal ImGui drawing, in our column.
-
-            if (ImGui::CollapsingHeader(textBuffer))
-            {
-                renderNode(node, j, 0);
-
-
-                if (ImGui::TreeNode("Open Tree"))
-                {
-                    static bool OP1_Bool = false;
-                    ImGui::Text("Checked: %s", OP1_Bool ? "true" : "false");
-                    ImGui::Checkbox("Option 1", &OP1_Bool);
-                    ImGui::TreePop();
-                    // printf("%d\n", OP1_Bool);
-                }
-
-            }
-            // Tree Column Shutdown
-            ImGui::EndColumns();
-
-            ed::EndNode(); // End of Tree Node Demo
-
-            if (firstframe)
-            {
-                ed::SetNodePosition(nodeID, ImVec2(420, 20 + j * 100));
-                *(node->data.staticBuffer) = 30;
-            }
-        }
-    }
-    */
-
-    /*
-     for (uint32_t i = 0; i < m_Nodes.size(); ++i)
-     {
-         char textBuffer[128];
-         TreeNode *node = m_Nodes[i]->parentNode;
-         if (ed::GetNodePosition((uint64_t)node).x == FLT_MAX)
-         {
-             continue;
-         }
-         // printf("hi\n");
-         ed::BeginNode((uint64_t)node);
-         char *metaClassName = getMetaClassName(node->typeSymbol);
-         ImGui::Text(metaClassName);
-
-         float width = 450; // bad magic numbers. used to define width of tree widget
-         // Pins Row
-         ed::BeginPin(nodeID - 1, ed::PinKind::Input);
-         ImGui::Text("-> prev");
-         ed::EndPin();
-         ImGui::SameLine();
-         ImGui::Dummy(ImVec2(width / 2 + width / 4, 0)); //  magic number - Crude & simple way to nudge over the output pin. Consider using layout and springs
-         ImGui::SameLine();
-         ed::BeginPin(nodeID + 1, ed::PinKind::Output);
-         ImGui::Text("next ->");
-         ed::EndPin();
-
-         // Tree column startup -------------------------------------------------------------------
-         // Push dummy widget to extend node size. Columns do not do that.
-         ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0.0f, 0.0f));
-         ImGui::Dummy(ImVec2(width, 0));
-         ImGui::PopStyleVar();
-
-         // Start columns, but use only first one.
-         sprintf(textBuffer, "##%s%d", metaClassName, i);
-         ImGui::BeginColumns(textBuffer, 2,
-                             ImGuiOldColumnFlags_NoBorder |
-                                 ImGuiOldColumnFlags_NoResize |
-                                 ImGuiOldColumnFlags_NoPreserveWidths |
-                                 ImGuiOldColumnFlags_NoForceWithinWindow);
-
-         // Adjust column width to match requested one.
-         ImGui::SetColumnWidth(0, width + ImGui::GetStyle().WindowPadding.x + ImGui::GetStyle().ItemSpacing.x);
-         // End of tree column startup --------------------------------------------------------------
-
-         // Back to normal ImGui drawing, in our column.
-
-         if (ImGui::CollapsingHeader(textBuffer))
-         {
-             renderNode(node, i, 0);
-
-
-             if (ImGui::TreeNode("Open Tree"))
-             {
-                 static bool OP1_Bool = false;
-                 ImGui::Text("Checked: %s", OP1_Bool ? "true" : "false");
-                 ImGui::Checkbox("Option 1", &OP1_Bool);
-                 ImGui::TreePop();
-                 // printf("%d\n", OP1_Bool);
-             }
-
-         }
-         // Tree Column Shutdown
-         ImGui::EndColumns();
-
-         ed::EndNode(); // End of Tree Node Demo
-
-         if (firstframe)
-         {
-             ImVec2 prevNodePos = ed::GetNodePosition(DlgGetPrevID(node));
-             if (prevNodePos.x != FLT_MAX)
-             {
-                 ed::SetNodePosition(nodeID, ImVec2(prevNodePos.x + 50, prevNodePos.y));
-             }
-             else
-             {
-                 ed::SetNodePosition(nodeID, ImVec2(400 * i, 100));
-             }
-         }
-     }
-     */
 
     // ==================================================================================================
     // Link Drawing Section

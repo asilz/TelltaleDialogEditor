@@ -1091,6 +1091,7 @@ int initializeMetaClassDescriptions()
     metaClassDescriptions[String].read = StringRead;
     metaClassDescriptions[AnimOrChore].read = AnimOrChoreRead;
     metaClassDescriptions[Vector3].read = Vector3Read;
+    metaClassDescriptions[Color].read = ColorRead;
 
     /* ScriptEnum */
     metaClassDescriptions[ScriptEnumAIAgentState].read = ScriptEnumRead;
@@ -1174,11 +1175,14 @@ int initializeMetaClassDescriptions()
     metaClassDescriptions[DlgChoice].read = DlgChoiceRead;
     metaClassDescriptions[DlgNodeChore].read = DlgNodeChoreRead;
     metaClassDescriptions[DlgNodeWait].read = DlgNodeWaitRead;
+    metaClassDescriptions[DlgNodeCancelChoices].read = DlgNodeCancelChoicesRead;
     metaClassDescriptions[DlgNodeMarker].read = DlgNodeMarkerRead;
     metaClassDescriptions[DlgNodeIdle].read = DlgNodeIdleRead;
     metaClassDescriptions[DlgConditionalCase].read = DlgConditionalCaseRead;
     metaClassDescriptions[DlgNodeScript].read = DlgNodeScriptRead;
     metaClassDescriptions[DlgNodeSequence].read = DlgNodeSequenceRead;
+    metaClassDescriptions[DlgNodeParallel].read = DlgNodeParallelRead;
+    metaClassDescriptions[DlgNodeParallelPElement].read = DlgNodeParallelPElementRead;
     metaClassDescriptions[DlgNodeJump].read = DlgNodeJumpRead;
     metaClassDescriptions[DlgNodeStart].read = DlgNodeStartRead;
     metaClassDescriptions[DlgNodeNotes].read = DlgNodeNotesRead;
@@ -1204,6 +1208,7 @@ int initializeMetaClassDescriptions()
     metaClassDescriptions[LanguageResProxy].render = renderInt4;
     metaClassDescriptions[String].render = renderString;
     metaClassDescriptions[UIDGenerator].render = renderInt4;
+    metaClassDescriptions[Color].render = renderColor;
 
     /* Handles */
     metaClassDescriptions[HandleTempD3DMeshLate].render = renderSymbol;

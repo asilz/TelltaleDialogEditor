@@ -12,3 +12,4 @@ EXTERNC int renderInt4(struct TreeNode *node, uint32_t flags);
 EXTERNC int renderBool(struct TreeNode *node, uint32_t flags);
 EXTERNC int renderString(struct TreeNode *node, uint32_t flags);
 EXTERNC int renderVector3(struct TreeNode *node, uint32_t flags);
+EXTERNC int renderColor(struct TreeNode *node, uint32_t flags);
