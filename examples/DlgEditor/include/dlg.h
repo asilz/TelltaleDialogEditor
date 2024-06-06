@@ -1,11 +1,10 @@
 #include <inttypes.h>
-#include <stdio.h>
 
 #ifndef DLG_H
 #define DLG_H
 
-uint64_t *DlgGetID(struct TreeNode *node);
 uint64_t *DlgGetNextID(struct TreeNode *node);
+uint64_t *DlgGetID(struct TreeNode *node);
 uint64_t *DlgGetPrevID(struct TreeNode *node);
 
 int DlgRead(FILE *stream, struct TreeNode *dlg, uint32_t flags);
@@ -16,11 +15,14 @@ int DlgNodeChoicesRead(FILE *stream, struct TreeNode *node, uint32_t flags);
 int DlgChoiceRead(FILE *stream, struct TreeNode *node, uint32_t flags);
 int DlgNodeChoreRead(FILE *stream, struct TreeNode *node, uint32_t flags);
 int DlgNodeWaitRead(FILE *stream, struct TreeNode *node, uint32_t flags);
+int DlgNodeCancelChoicesRead(FILE *stream, struct TreeNode *node, uint32_t flags);
 int DlgNodeMarkerRead(FILE *stream, struct TreeNode *node, uint32_t flags);
 int DlgNodeIdleRead(FILE *stream, struct TreeNode *node, uint32_t flags);
 int DlgConditionalCaseRead(FILE *stream, struct TreeNode *node, uint32_t flags);
 int DlgNodeScriptRead(FILE *stream, struct TreeNode *node, uint32_t flags);
 int DlgNodeSequenceRead(FILE *stream, struct TreeNode *node, uint32_t flags);
+int DlgNodeParallelRead(FILE *stream, struct TreeNode *node, uint32_t flags);
+int DlgNodeParallelPElementRead(FILE *stream, struct TreeNode *node, uint32_t flags);
 int DlgNodeSequenceElementRead(FILE *stream, struct TreeNode *node, uint32_t flags);
 int DlgNodeJumpRead(FILE *stream, struct TreeNode *node, uint32_t flags);
 int DlgNodeStartRead(FILE *stream, struct TreeNode *node, uint32_t flags);
@@ -52,4 +54,5 @@ int LogicItemRead(FILE *stream, struct TreeNode *logicItem, uint32_t flags);
 int ScriptEnumRead(FILE *stream, struct TreeNode *node, uint32_t flags);
 int AnimOrChoreRead(FILE *stream, struct TreeNode *node, uint32_t flags);
 int Vector3Read(FILE *stream, struct TreeNode *node, uint32_t flags);
+int ColorRead(FILE *stream, struct TreeNode *node, uint32_t flags);
 #endif
