@@ -21,6 +21,11 @@
 #include <gui.h>
 #include <stdio.h>
 
+extern "C"
+{
+#include <crc64.h>
+}
+
 int renderBool(struct TreeNode *node, uint32_t flags)
 {
     bool option = (bool)(*(node->data.staticBuffer) - 30);
@@ -49,10 +54,28 @@ int renderInt4(struct TreeNode *node, uint32_t flags)
 
 int renderSymbol(struct TreeNode *node, uint32_t flags)
 {
-    char textBuffer[19];
-    sprintf(textBuffer, "0x%02X%02X%02X%02X%02X%02X%02X%02X", node->data.staticBuffer[7], node->data.staticBuffer[6], node->data.staticBuffer[5], node->data.staticBuffer[4], node->data.staticBuffer[3], node->data.staticBuffer[2], node->data.staticBuffer[1], node->data.staticBuffer[0]);
-    ImGui::InputText("Hex", textBuffer, 19);
-    sscanf(textBuffer + 2, "%" PRIx64, (uint64_t *)(node->data.staticBuffer));
+    char *fileName = getFileName(*(uint64_t *)node->data.staticBuffer);
+    char fileNameBuffer[256] = {0};
+    char hexBuffer[19];
+    sprintf(hexBuffer, "0x%016lX", *(uint64_t *)node->data.staticBuffer);
+
+    if (fileName != NULL)
+    {
+        memcpy(fileNameBuffer, fileName, strlen(fileName) + 1);
+    }
+    bool textIsInput = ImGui::InputText("String", fileNameBuffer, 256);
+
+    bool hexIsInput = ImGui::InputText("Hex", hexBuffer, 19);
+    if (hexIsInput)
+    {
+        sscanf(hexBuffer + 2, "%" PRIx64, (uint64_t *)(node->data.staticBuffer));
+    }
+
+    if (textIsInput)
+    {
+        *(uint64_t *)(node->data.staticBuffer) = CRC64_CaseInsensitive(0, (uint8_t *)fileNameBuffer);
+    }
+
     return 0;
 }
 
