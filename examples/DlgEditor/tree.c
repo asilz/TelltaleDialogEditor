@@ -1,6 +1,7 @@
 #include <tree.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <stream.h>
 
 void treeFree(struct TreeNode *root)
@@ -62,4 +63,40 @@ uint32_t writeTree(FILE *stream, struct TreeNode *root)
         ret += fwrite(root->data.dynamicBuffer, 1, root->dataSize, stream);
     }
     return ret;
+}
+
+void treePushBack(struct TreeNode *tree, struct TreeNode *child)
+{
+    tree->children = realloc(tree->children, (++tree->childCount) * sizeof(struct TreeNode *));
+    tree->children[tree->childCount - 1] = child;
+    child->parent = tree; // TODO: Maybe remove this and let the user do this manually since this requires that memory is allocated for the child which I might not always be able to garantuee.
+}
+
+struct TreeNode *copyTree(struct TreeNode *tree)
+{
+    struct TreeNode *copy = malloc(sizeof(struct TreeNode));
+
+    copy->dataSize = tree->dataSize;
+    copy->childCount = tree->childCount;
+    copy->isBlocked = tree->isBlocked;
+    copy->typeSymbol = tree->typeSymbol;
+    copy->serializeType = tree->serializeType;
+
+    if (copy->dataSize > sizeof(tree->data))
+    {
+        copy->data.dynamicBuffer = malloc(copy->dataSize);
+        memcpy(copy->data.dynamicBuffer, tree->data.dynamicBuffer, copy->dataSize);
+    }
+    else
+    {
+        memcpy(copy->data.staticBuffer, tree->data.staticBuffer, sizeof(tree->data));
+    }
+
+    copy->children = malloc(copy->childCount * sizeof(struct TreeNode *));
+    for (uint16_t i = 0; i < tree->childCount; ++i)
+    {
+        copy->children[i] = copyTree(tree->children[i]);
+    }
+
+    return copy;
 }

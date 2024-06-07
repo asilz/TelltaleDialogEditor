@@ -10,6 +10,7 @@
 #include <dlg.h>
 #include <ttstring.h>
 #include <gui.h>
+#include <meta_tab.h>
 
 #define META_CLASS_DESCRIPTIONS_COUNT 978
 
@@ -1201,6 +1202,7 @@ int initializeMetaClassDescriptions()
     metaClassDescriptions[Symbol].render = renderSymbol;
     metaClassDescriptions[int_type].render = renderInt4;
     metaClassDescriptions[long_type].render = renderInt4;
+    metaClassDescriptions[int32_type].render = renderInt4;
     metaClassDescriptions[float_type].render = renderFloat;
     metaClassDescriptions[bool_type].render = renderBool;
     metaClassDescriptions[Vector3].render = renderVector3;
