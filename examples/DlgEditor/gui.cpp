@@ -140,15 +140,21 @@ int renderNode(struct TreeNode *node, int uniqueID, uint32_t flags)
     // printf("%d\n", node->childCount);
     if (node->childCount == 0)
     {
-        renderMetaClass(node, flags);
+        node->description->render(node, flags);
         // printf("%d\n", option);
 
         return 0;
     }
     for (uint16_t i = 0; i < node->childCount; ++i)
     {
+
         char text[128];
-        sprintf(text, "%s##%d-%d", getMetaClassName(node->children[i]->typeSymbol), uniqueID, i);
+        const char *name = "(null)";
+        if (node->children[i]->description != NULL)
+        {
+            name = node->children[i]->description->name;
+        }
+        sprintf(text, "%s##%d-%d", name, uniqueID, i);
         if (ImGui::TreeNode(text))
         {
             renderNode(node->children[i], uniqueID, flags);
@@ -160,7 +166,6 @@ int renderNode(struct TreeNode *node, int uniqueID, uint32_t flags)
 
 DlgApplication::DlgApplication(const char *name, FILE *inputStream) : Application(name)
 {
-    initializeMetaClassDescriptions();
     dlg.dataSize = 0;
 
     readMetaStreamHeader(inputStream, &(this->header));
@@ -187,7 +192,7 @@ void DlgApplication::CreateLinks()
     for (uint32_t i = 1; i < *(uint64_t *)(dlg.children[14]->children[0]->data.staticBuffer); ++i)
     {
         TreeNode *node = dlg.children[14]->children[i];
-        if (node->typeSymbol == 0x13998d6f0bde3491) // DlgNodeChoices
+        if (node->description->crc == 0x13998d6f0bde3491) // DlgNodeChoices
         {
             for (uint32_t j = 1; j < *(uint64_t *)(node->children[1]->children[0]->children[0]->data.staticBuffer); ++j)
             {
@@ -205,7 +210,7 @@ void DlgApplication::CreateLinks()
                 AddNextLinks(child);
             }
         }
-        else if (node->typeSymbol == 0x789758cb1a8d6628 || node->typeSymbol == 0x36e367b48ad63274 || node->typeSymbol == 0x97ba9139ccc1cf26) // DlgNodeConditional || DlgNodeSequence || DlgNodeParallel
+        else if (node->description->crc == 0x789758cb1a8d6628 || node->description->crc == 0x36e367b48ad63274 || node->description->crc == 0x97ba9139ccc1cf26) // DlgNodeConditional || DlgNodeSequence || DlgNodeParallel
         {
             for (uint32_t j = 1; j < *(uint64_t *)(node->children[1]->children[0]->children[0]->data.staticBuffer); ++j)
             {
@@ -273,8 +278,12 @@ void DlgApplication::OnFrame(float deltaTime)
         float width = 450; // bad magic numbers. used to define width of tree widget
         TreeNode *node = m_Nodes[i].parentNode;
         ed::BeginNode((uint64_t)node);
-        char *metaClassName = getMetaClassName(node->typeSymbol);
-        ImGui::Text(metaClassName);
+        const char *name = "(null)";
+        if (node->description != NULL)
+        {
+            name = node->description->name;
+        }
+        ImGui::Text(name);
         if (m_Nodes[i].pinType == NodePin::PinType::prev)
         {
             ed::BeginPin((uint64_t)(&m_Nodes[i]), ed::PinKind::Input);
@@ -305,7 +314,7 @@ void DlgApplication::OnFrame(float deltaTime)
 
         // Start columns, but use only first one.
         char textBuffer[128];
-        sprintf(textBuffer, "##%s%d", metaClassName, i);
+        sprintf(textBuffer, "##%s%d", name, i);
         ImGui::BeginColumns(textBuffer, 2,
                             ImGuiOldColumnFlags_NoBorder |
                                 ImGuiOldColumnFlags_NoResize |
