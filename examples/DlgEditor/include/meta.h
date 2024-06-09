@@ -17,11 +17,8 @@ struct MetaStreamHeader // Based on Lucas Saragosa's Telltale inspector
     struct MetaStreamCrc *crc;
 };
 
-void readMetaStreamHeader(FILE *stream, struct MetaStreamHeader *header);
 void writeMetaStreamHeader(FILE *stream, struct MetaStreamHeader *header);
-int readMetaClass(FILE *stream, struct TreeNode *node, uint32_t flags);
-int writeMetaClass(FILE *stream, struct TreeNode *node, uint32_t flags);
-int initializeMetaClassDescriptions();
-char *getMetaClassName(uint64_t typeSymbol);
+const struct MetaClassDescription *getMetaClassDescriptionBySymbol(uint64_t symbol);
+const struct MetaClassDescription *getMetaClassDescriptionByIndex(uint16_t index);
+void readMetaStreamHeader(FILE *stream, struct MetaStreamHeader *header);
 char *getFileName(uint64_t symbol);
-int renderMetaClass(struct TreeNode *node, uint32_t flags);
