@@ -17,7 +17,7 @@
 
 #define META_CLASS_DESCRIPTIONS_COUNT 978
 
-const struct MetaClassDescription descriptions[META_CLASS_DESCRIPTIONS_COUNT] = {
+static const struct MetaClassDescription descriptions[META_CLASS_DESCRIPTIONS_COUNT] = {
     {0x004F023463D89FB0, "Symbol", intrinsic8Read, renderSymbol},
     {0x00A87B9875C485DB, "DCArray<LanguageResLocal>", NULL, NULL},
     {0x00ACFF947A409DDB, "Mover", NULL, NULL},
