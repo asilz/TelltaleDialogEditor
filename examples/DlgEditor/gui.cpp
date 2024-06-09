@@ -57,7 +57,7 @@ int renderSymbol(struct TreeNode *node, uint32_t flags)
     char *fileName = getFileName(*(uint64_t *)node->data.staticBuffer);
     char fileNameBuffer[256] = {0};
     char hexBuffer[19];
-    sprintf(hexBuffer, "0x%016lX", *(uint64_t *)node->data.staticBuffer);
+    sprintf(hexBuffer, "0x%016" PRIX64, *(uint64_t *)node->data.staticBuffer);
 
     if (fileName != NULL)
     {
@@ -68,7 +68,7 @@ int renderSymbol(struct TreeNode *node, uint32_t flags)
     bool hexIsInput = ImGui::InputText("Hex", hexBuffer, 19);
     if (hexIsInput)
     {
-        sscanf(hexBuffer + 2, "%" PRIx64, (uint64_t *)(node->data.staticBuffer));
+        sscanf(hexBuffer + 2, "%" PRIX64, (uint64_t *)(node->data.staticBuffer));
     }
 
     if (textIsInput)
@@ -167,6 +167,8 @@ int renderNode(struct TreeNode *node, int uniqueID, uint32_t flags)
 DlgApplication::DlgApplication(const char *name, FILE *inputStream) : Application(name)
 {
     dlg.dataSize = 0;
+    dlg.serializeType = 0;
+    dlg.isBlocked = 0;
 
     readMetaStreamHeader(inputStream, &(this->header));
     DlgRead(inputStream, &(this->dlg), 0);
