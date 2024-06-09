@@ -11,6 +11,7 @@ if(UNIX)
         crc64.c
         tree.c
         stream_unix.c
+        landb.c
     )
 endif(UNIX)
 
@@ -27,6 +28,7 @@ if(MSVC)
         crc64.c
         tree.c
         stream_windows.c
+        landb.c
     )
 endif(MSVC)
 
