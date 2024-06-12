@@ -18,7 +18,6 @@ struct MetaClassDescription
 
 struct TreeNode
 {
-    // char *description; // null terminated string
     union Data
     {
         uint8_t *dynamicBuffer;
