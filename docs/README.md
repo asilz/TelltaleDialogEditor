@@ -70,6 +70,8 @@ Windows:
     cmake -S examples -B build -G "Visual Studio 15 2017 Win64"
       or
     cmake -S examples -B build -G "Visual Studio 16 2019" -A x64
+      or
+    cmake -S examples -B build -G "Visual Studio 17 2022" -A x64
 
 macOS:
     cmake -S examples -B build -G "Xcode"
