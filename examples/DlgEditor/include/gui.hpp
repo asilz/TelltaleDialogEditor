@@ -23,9 +23,20 @@ struct DlgApplication : public Application
 {
     using Application::Application;
 
+    struct NodePin;
+    struct LinkInfo;
+
+    struct Node
+    {
+        struct TreeNode *data;
+        NodePin *prevPin;
+        NodePin *nextPin;
+    };
+
     struct NodePin
     {
-        struct TreeNode *parentNode;
+        Node *parentNode;
+        LinkInfo *link;
         enum PinType
         {
             prev,
@@ -35,8 +46,8 @@ struct DlgApplication : public Application
 
     struct LinkInfo
     {
-        struct NodePin *srcNode;
-        struct NodePin *destNode;
+        NodePin *srcPin;
+        NodePin *destPin;
     };
 
     void OnStart() override;
@@ -49,12 +60,12 @@ struct DlgApplication : public Application
 
     DlgApplication(const char *name, FILE *inputStream);
 
-    void AddNextLinks(struct TreeNode *node);
+    void AddNextLinks(Node *node);
 
     ed::EditorContext *m_Context = nullptr;
 
     struct TreeNode dlg;
+    struct TreeNode *copiedNode;
     MetaStreamHeader header;
-    ImVector<LinkInfo> m_Links;
-    ImVector<NodePin> m_Nodes;
+    ImVector<Node *> nodes;
 };
