@@ -995,7 +995,7 @@ static const struct MetaClassDescription descriptions[META_CLASS_DESCRIPTIONS_CO
     {0xFD0F32CBB13B258D, "CompressedKeys<Handle<SoundBusSnapshot::Snapshot>>", NULL, NULL},
     {0xFD267A5B808A5824, "List<Handle<AnimOrChore>>", NULL, NULL},
     {0xFD45D124E5FAC6CE, "T3MeshMaterial", T3MeshMaterialRead, NULL},
-    {0xFD5454BA0F088B05, "wbox", NULL, NULL},
+    {0xFD5454BA0F088B05, "wbox", WalkBoxesRead, NULL},
     {0xFE828771D8009C1D, "preloadpackagertd", NULL, NULL},
     {0xFE96A13E293CC8EF, "Map<String,DCArray<unsignedchar>,less<String>>", NULL, NULL},
     {0xFF15DC09F8B4F0E1, "IdleTransitionSettings", NULL, NULL},
