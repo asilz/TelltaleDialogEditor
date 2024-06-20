@@ -69,3 +69,21 @@ struct DlgApplication : public Application
     MetaStreamHeader header;
     ImVector<Node *> nodes;
 };
+
+struct GeneralApplication : public Application
+{
+    using Application::Application;
+
+    ed::EditorContext *m_Context = nullptr;
+
+    void OnStart() override;
+
+    void OnStop() override;
+
+    void OnFrame(float deltaTime) override;
+
+    GeneralApplication(const char *name, const char *extension, FILE *inputStream);
+
+    struct TreeNode data;
+    MetaStreamHeader header;
+};

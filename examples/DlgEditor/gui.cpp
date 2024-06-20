@@ -23,20 +23,21 @@
 
 extern "C"
 {
+#include <types.h>
 #include <crc64.h>
 }
 
-int renderBool(struct TreeNode *node, uint32_t flags)
+int BoolRender(struct TreeNode *node, uint32_t flags)
 {
-    bool option = (bool)(*(node->data.staticBuffer) - 30);
+    bool option = (bool)(*(node->data.staticBuffer) - '0');
     ImGui::Text("Checked: %s", option ? "true" : "false");
     ImGui::Checkbox("Option 1", &option);
-    *(node->data.staticBuffer) = (uint8_t)(option) + 30;
+    *(node->data.staticBuffer) = (uint8_t)(option) + '0';
     // printf("%d\n", option);
     return 0;
 }
 
-int renderFloat(struct TreeNode *node, uint32_t flags)
+int FloatRender(struct TreeNode *node, uint32_t flags)
 {
     float f0 = *(float *)(node->data.staticBuffer);
     ImGui::InputFloat("input float", &f0, 0.01f, 1.0f, "%.3f");
@@ -44,15 +45,47 @@ int renderFloat(struct TreeNode *node, uint32_t flags)
     return 0;
 }
 
-int renderInt4(struct TreeNode *node, uint32_t flags)
+int u8Render(struct TreeNode *node, uint32_t flags)
 {
-    int i0 = *(int *)(node->data.staticBuffer);
-    ImGui::InputInt("input int", &i0);
-    *(int *)(node->data.staticBuffer) = i0;
-    return 0;
+    return ImGui::InputScalar("input int", ImGuiDataType_::ImGuiDataType_U8, (uint8_t *)node->data.staticBuffer);
 }
 
-int renderSymbol(struct TreeNode *node, uint32_t flags)
+int s8Render(struct TreeNode *node, uint32_t flags)
+{
+    return ImGui::InputScalar("input int", ImGuiDataType_::ImGuiDataType_S8, (int8_t *)node->data.staticBuffer);
+}
+
+int u16Render(struct TreeNode *node, uint32_t flags)
+{
+    return ImGui::InputScalar("input int", ImGuiDataType_::ImGuiDataType_U16, (uint16_t *)node->data.staticBuffer);
+}
+
+int s16Render(struct TreeNode *node, uint32_t flags)
+{
+    return ImGui::InputScalar("input int", ImGuiDataType_::ImGuiDataType_S16, (int16_t *)node->data.staticBuffer);
+}
+
+int u32Render(struct TreeNode *node, uint32_t flags)
+{
+    return ImGui::InputScalar("input int", ImGuiDataType_::ImGuiDataType_U32, (uint32_t *)node->data.staticBuffer);
+}
+
+int s32Render(struct TreeNode *node, uint32_t flags)
+{
+    return ImGui::InputScalar("input int", ImGuiDataType_::ImGuiDataType_S32, (int32_t *)node->data.staticBuffer);
+}
+
+int u64Render(struct TreeNode *node, uint32_t flags)
+{
+    return ImGui::InputScalar("input int", ImGuiDataType_::ImGuiDataType_U64, (uint64_t *)node->data.staticBuffer);
+}
+
+int s64Render(struct TreeNode *node, uint32_t flags)
+{
+    return ImGui::InputScalar("input int", ImGuiDataType_::ImGuiDataType_S64, (int64_t *)node->data.staticBuffer);
+}
+
+int SymbolRender(struct TreeNode *node, uint32_t flags)
 {
     char *fileName = getFileName(*(uint64_t *)node->data.staticBuffer);
     char fileNameBuffer[256] = {0};
@@ -68,7 +101,7 @@ int renderSymbol(struct TreeNode *node, uint32_t flags)
     bool hexIsInput = ImGui::InputText("Hex", hexBuffer, 19);
     if (hexIsInput)
     {
-        sscanf(hexBuffer + 2, "%" PRIX64, (uint64_t *)(node->data.staticBuffer));
+        sscanf(hexBuffer + 2, "%16" PRIX64, (uint64_t *)(node->data.staticBuffer));
     }
 
     if (textIsInput)
@@ -79,7 +112,18 @@ int renderSymbol(struct TreeNode *node, uint32_t flags)
     return 0;
 }
 
-int renderString(struct TreeNode *node, uint32_t flags)
+int HandleBaseRender(struct TreeNode *node, uint32_t flags)
+{
+    SymbolRender(node, flags);
+    if (node->dataSize == 2 * sizeof(uint64_t))
+    {
+        ImGui::InputScalar("input int", ImGuiDataType_::ImGuiDataType_S64, node->data.dynamicBuffer + sizeof(uint64_t));
+    }
+
+    return 0;
+}
+
+int StringRender(struct TreeNode *node, uint32_t flags)
 {
     constexpr uint32_t BUFFER_SIZE = 1024;
     char stringBuffer[BUFFER_SIZE];
@@ -126,25 +170,32 @@ int renderString(struct TreeNode *node, uint32_t flags)
     // return ImGui::InputText("String", (char *)(node->data.dynamicBuffer + 4), *(uint32_t *)(node->data.dynamicBuffer));
 }
 
-int renderVector3(struct TreeNode *node, uint32_t flags)
+int Vector3Render(struct TreeNode *node, uint32_t flags)
 {
     return ImGui::InputFloat3("xyz", (float *)(node->data.dynamicBuffer));
 }
 
-int renderColor(struct TreeNode *node, uint32_t flags)
+int Vector4Render(struct TreeNode *node, uint32_t flags)
 {
-    return ImGui::InputFloat4("rgba", (float *)(node->data.dynamicBuffer));
+    return ImGui::InputFloat4("xyzw", (float *)(node->data.dynamicBuffer));
+}
+
+int ColorRender(struct TreeNode *node, uint32_t flags)
+{
+    return ImGui::ColorPicker4("rgba", (float *)(node->data.dynamicBuffer));
 }
 
 int renderNode(struct TreeNode *node, int uniqueID, uint32_t flags)
 {
     // printf("%d\n", node->childCount);
+    if (node->description != NULL && node->description->render != NULL)
+    {
+        return node->description->render(node, flags);
+    }
     if (node->childCount == 0)
     {
-        node->description->render(node, flags);
-        // printf("%d\n", option);
-
-        return 0;
+        ImGui::Text("Render function not implemented, cannot view content");
+        return -4;
     }
     for (uint16_t i = 0; i < node->childCount; ++i)
     {
@@ -497,4 +548,66 @@ void DlgApplication::OnFrame(float deltaTime)
     firstframe = false;
     // ImGui::ShowMetricsWindow();
     // ImGui::ShowDemoWindow();
+}
+
+/* General Application */
+
+GeneralApplication::GeneralApplication(const char *name, const char *extension, FILE *inputStream) : Application(name)
+{
+    data.dataSize = 0;
+    data.serializeType = 0;
+    data.isBlocked = 0;
+
+    readMetaStreamHeader(inputStream, &(this->header));
+    const struct MetaClassDescription *description = getMetaClassDescriptionBySymbol(CRC64_CaseInsensitive(0, (uint8_t *)extension));
+    description->read(inputStream, &(this->data), 0);
+    fclose(inputStream);
+
+    printf("created Links\n");
+}
+
+void GeneralApplication::OnStart()
+{
+    // ed::Config config;
+    // config.SettingsFile = "General.json";
+    // m_Context = ed::CreateEditor(&config);
+
+    // printf("Read dlog %d, %d\n", links.size(), pins.size());
+}
+
+void GeneralApplication::OnFrame(float deltaTime)
+{
+    float width = ImGui::GetWindowWidth() - 20;
+    const char *name = "(null)";
+    if (data.description != NULL)
+    {
+        name = data.description->name;
+    }
+    char textBuffer[128];
+    snprintf(textBuffer, 128, "##%s%d", name, 1);
+    ImGui::BeginColumns(textBuffer, 2,
+                        ImGuiOldColumnFlags_NoBorder |
+                            ImGuiOldColumnFlags_NoResize |
+                            ImGuiOldColumnFlags_NoPreserveWidths |
+                            ImGuiOldColumnFlags_NoForceWithinWindow);
+
+    // Adjust column width to match requested one.
+    ImGui::SetColumnWidth(0, width + ImGui::GetStyle().WindowPadding.x + ImGui::GetStyle().ItemSpacing.x);
+    // End of tree column startup --------------------------------------------------------------
+
+    // Back to normal ImGui drawing, in our column.
+
+    if (ImGui::CollapsingHeader(textBuffer, ImGuiWindowFlags_AlwaysVerticalScrollbar))
+    {
+        ImGui::BeginChild("Scrolling");
+        renderNode(&data, 1, 0);
+        ImGui::EndChild();
+    }
+
+    return;
+}
+
+void GeneralApplication::OnStop()
+{
+    ed::DestroyEditor(m_Context);
 }

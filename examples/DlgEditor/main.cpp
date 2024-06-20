@@ -6,7 +6,7 @@ extern "C"
 
 int Main(int argc, char **argv)
 {
-    int ret;
+    int ret = 0;
     if (argc < 2)
     {
         printf("Too few arguments\n");
@@ -18,23 +18,65 @@ int Main(int argc, char **argv)
         printf("invalid input path\n");
         return -2;
     }
-    DlgApplication exampe("Blueprints", inputStream);
-
-    if (exampe.Create())
-        ret = exampe.Run();
-
-    if (argc == 3)
+    uint32_t extensionIndex = 0;
+    while (1)
     {
-        FILE *outputStream = cfopen(argv[2], "wb");
-        printf("argc %d\n", argc);
-        writeMetaStreamHeader(outputStream, &(exampe.header));
-        writeTree(outputStream, &(exampe.dlg));
-        fclose(outputStream);
+        if (argv[1][extensionIndex++] == '.')
+        {
+            break;
+        }
     }
 
-    treeFree(&exampe.dlg);
+    if (strcmp(argv[1] + extensionIndex, "dlog") == 0)
+    {
+        DlgApplication exampe("Blueprints", inputStream);
 
-    return ret;
+        if (exampe.Create())
+            ret = exampe.Run();
 
-    return 0;
+        if (argc == 3)
+        {
+            FILE *outputStream = cfopen(argv[2], "wb");
+            if (outputStream == NULL)
+            {
+                treeFree(&exampe.dlg);
+                printf("invalid output path\n");
+                return -2;
+            }
+            printf("argc %d\n", argc);
+            writeMetaStreamHeader(outputStream, &(exampe.header));
+            writeTree(outputStream, &(exampe.dlg));
+            fclose(outputStream);
+        }
+
+        treeFree(&exampe.dlg);
+
+        return ret;
+    }
+    else
+    {
+        GeneralApplication exampe("Blueprints", argv[1] + extensionIndex, inputStream);
+
+        if (exampe.Create())
+            ret = exampe.Run();
+
+        if (argc == 3)
+        {
+            FILE *outputStream = cfopen(argv[2], "wb");
+            if (outputStream == NULL)
+            {
+                treeFree(&exampe.data);
+                printf("invalid output path\n");
+                return -2;
+            }
+            printf("argc %d\n", argc);
+            writeMetaStreamHeader(outputStream, &(exampe.header));
+            writeTree(outputStream, &(exampe.data));
+            fclose(outputStream);
+        }
+
+        treeFree(&exampe.data);
+
+        return ret;
+    }
 }
