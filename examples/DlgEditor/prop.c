@@ -67,6 +67,7 @@ int TypeGroupRead(FILE *stream, struct TreeNode *group, uint32_t flags)
         }
         else
         {
+            int64_t ftell = cftell(stream);
             group->children[1]->children[i]->description = metaClassDescription;
             metaClassDescription->read(stream, group->children[1]->children[i], flags);
         }
@@ -83,7 +84,7 @@ static int PropCoreRead(FILE *stream, struct TreeNode *prop, uint32_t flags) // 
     prop->children[0] = calloc(1, sizeof(struct TreeNode));
     prop->children[0]->parent = prop;
     prop->children[0]->description = getMetaClassDescriptionByIndex(DCArray_Handle_PropertySet__);
-    genericArrayRead(stream, prop->children[0], flags, getMetaClassDescriptionByIndex(Handle_PropertySet_)); // List of Handle<PropertySet>
+    prop->children[0]->description->read(stream, prop->children[0], flags);
 
     prop->children[1] = calloc(1, sizeof(struct TreeNode));
     prop->children[1]->parent = prop;
@@ -125,4 +126,9 @@ int PropRead(FILE *stream, struct TreeNode *prop, uint32_t flags)
     PropCoreRead(stream, prop->children[2], flags);
 
     return 0;
+}
+
+int DCArray_Handle_PropertySet__Read(FILE *stream, struct TreeNode *node, uint32_t flags)
+{
+    return genericArrayRead(stream, node, flags, getMetaClassDescriptionByIndex(Handle_PropertySet_));
 }

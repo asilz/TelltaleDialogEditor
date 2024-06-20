@@ -36,5 +36,6 @@ void treeFree(struct TreeNode *root);
 uint32_t writeTree(FILE *stream, struct TreeNode *root);
 void treePushBack(struct TreeNode *tree, struct TreeNode *child);
 struct TreeNode *copyTree(struct TreeNode *tree);
+void treeErase(struct TreeNode *tree, uint16_t childIndex);
 
 #endif
