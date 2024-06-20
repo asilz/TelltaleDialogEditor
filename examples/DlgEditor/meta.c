@@ -247,6 +247,7 @@ static const struct MetaClassDescription descriptions[META_CLASS_DESCRIPTIONS_CO
     {0x36FFAE9C29F1BC0E, "DCArray<KeyframedValue<Handle<PhonemeTable>>::Sample>", NULL, NULL},
     {0x374927061B784594, "DCArray<Vector3>", DCArray_Vector3_Read, NULL},
     {0x37B8C02CC0B488BE, "Handle<EventStorage>", intrinsic8Read, SymbolRender},
+    {0x37DE14C5DCF138F5, "T3MeshMaterialOverride", T3MeshMaterialOverrideRead, NULL},
     {0x383AEB196C60831B, "LocationInfo", LocationInfoRead, NULL},
     {0x387E6B9CA558AC8D, "Handle<PropertySet>", intrinsic8Read, SymbolRender},
     {0x394C43AF4FF52C94, "Vector3", Vector3Read, Vector3Render},
@@ -534,6 +535,7 @@ static const struct MetaClassDescription descriptions[META_CLASS_DESCRIPTIONS_CO
     {0x81C39B4E937FC726, "Map<Symbol,TransitionMap::TransitionMapInfo,less<Symbol>>", NULL, NULL},
     {0x81FA12B1E2409F18, "T3MaterialCompiledData", T3MaterialCompiledDataRead, NULL},
     {0x823DB9F90B846250, "Handle<Skeleton>", intrinsic8Read, SymbolRender},
+    {0x825ec630bee9ea3e, "T3MeshTexture", T3MeshTextureRead, NULL}, // CUSTOM
     {0x826B8E99FDBE2397, "EnumEmitterSpawnShape", intrinsic4Read, s32Render},
     {0x828001AD1111D929, "SingleValue<T3VertexBufferSample<T3PositionSampleData,T3HeapAllocator>>", NULL, NULL},
     {0x82D163B740475ACD, "EnumHBAOQualityLevel", intrinsic4Read, s32Render},
