@@ -924,7 +924,7 @@ static const struct MetaClassDescription descriptions[META_CLASS_DESCRIPTIONS_CO
     {0xE89EBE3CD9FBD25A, "CameraFacingTypes", NULL, NULL},
     {0xE8B65EEA1581A9DA, "DlgNodeInstanceSequence::ElemInstanceData", NULL, NULL},
     {0xE8F586C87CB34551, "HandleLock<PropertySet>", NULL, NULL},
-    {0xE908072C98443ADA, "prop", NULL, NULL},
+    {0xE908072C98443ADA, "prop", PropRead, NULL},
     {0xE98036E69062C8F4, "ChoreAgent", ChoreAgentRead, NULL},
     {0xE9EFDB064BDA7682, "DCArray<Handle<AnimOrChore>>", NULL, NULL},
     {0xE9FA4A9E9D453359, "Skeleton::Entry", SkeletonEntryRead, NULL},
