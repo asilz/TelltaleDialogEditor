@@ -87,7 +87,7 @@ int s64Render(struct TreeNode *node, uint32_t flags)
 
 int SymbolRender(struct TreeNode *node, uint32_t flags)
 {
-    char *fileName = getFileName(*(uint64_t *)node->data.staticBuffer);
+    const char *fileName = getFileName(*(uint64_t *)node->data.staticBuffer);
     char fileNameBuffer[256] = {0};
     char hexBuffer[19];
     snprintf(hexBuffer, 19, "0x%016" PRIX64, *(uint64_t *)node->data.staticBuffer);
@@ -200,13 +200,14 @@ int renderNode(struct TreeNode *node, int uniqueID, uint32_t flags)
     for (uint16_t i = 0; i < node->childCount; ++i)
     {
 
-        char text[128];
+        char text[256];
         const char *name = "(null)";
+        const MetaClassDescription *description = node->children[i]->description;
         if (node->children[i]->description != NULL)
         {
             name = node->children[i]->description->name;
         }
-        snprintf(text, 128, "%s##%d-%d", name, uniqueID, i);
+        snprintf(text, 256, "%s##%d-%d", name, uniqueID, i);
         if (ImGui::TreeNode(text))
         {
             renderNode(node->children[i], uniqueID, flags);
@@ -560,10 +561,13 @@ GeneralApplication::GeneralApplication(const char *name, const char *extension, 
 
     readMetaStreamHeader(inputStream, &(this->header));
     const struct MetaClassDescription *description = getMetaClassDescriptionBySymbol(CRC64_CaseInsensitive(0, (uint8_t *)extension));
+    if (description == NULL || description->read == NULL)
+    {
+        printf("file with extension %s is not supported\n", extension);
+        exit(-1);
+    }
     description->read(inputStream, &(this->data), 0);
     fclose(inputStream);
-
-    printf("created Links\n");
 }
 
 void GeneralApplication::OnStart()
