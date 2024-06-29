@@ -1,3 +1,5 @@
+set(CMAKE_BUILD_TYPE Debug)
+
 if(UNIX)
     add_example_executable(dlgEditor
         main.cpp
@@ -12,6 +14,15 @@ if(UNIX)
         tree.c
         stream_unix.c
         landb.c
+        chore.c
+        skeleton.c
+        wbox.c
+        d3dmesh.c
+        scene.c
+        ptable.c
+        style.c
+        sprite.c
+        animation.c
     )
 endif(UNIX)
 
@@ -29,6 +40,15 @@ if(MSVC)
         tree.c
         stream_windows.c
         landb.c
+        chore.c
+        skeleton.c
+        wbox.c
+        d3dmesh.c
+        scene.c
+        ptable.c
+        style.c
+        sprite.c
+        animation.c
     )
 endif(MSVC)
 
