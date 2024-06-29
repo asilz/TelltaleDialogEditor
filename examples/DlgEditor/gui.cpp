@@ -20,6 +20,7 @@
 #include <gui.hpp>
 #include <gui.h>
 #include <stdio.h>
+#include <inttypes.h>
 
 extern "C"
 {
@@ -83,6 +84,272 @@ int u64Render(struct TreeNode *node, uint32_t flags)
 int s64Render(struct TreeNode *node, uint32_t flags)
 {
     return ImGui::InputScalar("input int", ImGuiDataType_::ImGuiDataType_S64, (int64_t *)node->data.staticBuffer);
+}
+
+struct CompressedSkeletonPoseKeys2Header
+{
+    float minDeltaV[3];
+    float scaleDeltaV[3];
+    float minDeltaQ[3];
+    float scaleDeltaQ[3];
+    float minVector[3];
+    float scaleVector[3];
+};
+
+int CompressedSkeletonPoseKeys2Render(struct TreeNode *node, uint32_t flags)
+{
+    uint8_t *data = node->data.dynamicBuffer + sizeof(uint32_t);
+
+    struct CompressedSkeletonPoseKeys2Header header = *(struct CompressedSkeletonPoseKeys2Header *)data;
+    header.scaleVector[0] = header.scaleVector[0] * 9.536752e-07;
+    header.scaleVector[1] = header.scaleVector[1] * 2.384186e-07;
+    header.scaleVector[2] = header.scaleVector[2] * 2.384186e-07;
+
+    header.scaleDeltaV[0] = header.scaleDeltaV[0] * 0.0009775171;
+    header.scaleDeltaV[1] = header.scaleDeltaV[1] * 0.0004885198;
+    header.scaleDeltaV[2] = header.scaleDeltaV[2] * 0.0004885198;
+
+    header.scaleDeltaQ[0] = header.scaleDeltaQ[0] * 0.0009775171;
+    header.scaleDeltaQ[1] = header.scaleDeltaQ[1] * 0.0004885198;
+    header.scaleDeltaQ[2] = header.scaleDeltaQ[2] * 0.0004885198;
+
+    ImGui::Text("Global Data");
+
+    ImGui::InputFloat3("Min DeltaV", (float *)data);
+    data += 3 * sizeof(float);
+
+    ImGui::InputFloat3("Scale DeltaV", (float *)data);
+    data += 3 * sizeof(float);
+
+    ImGui::InputFloat3("Min DeltaQ", (float *)data);
+    data += 3 * sizeof(float);
+
+    ImGui::InputFloat3("Scale DeltaQ", (float *)data);
+    data += 3 * sizeof(float);
+
+    ImGui::InputFloat3("Min Vector", (float *)data);
+    data += 3 * sizeof(float);
+
+    ImGui::InputFloat3("Scale Vector", (float *)data);
+    data += 3 * sizeof(float);
+
+    float timeScale = *(float *)data;
+
+    ImGui::InputFloat("unknown", (float *)data);
+    data += sizeof(float);
+
+    uint16_t boneSymbolCount = *(uint16_t *)data;
+
+    ImGui::InputScalar("boneSymbolCount", ImGuiDataType_::ImGuiDataType_U16, (uint16_t *)data);
+    data += sizeof(uint16_t);
+
+    ImGui::InputScalar("unknown", ImGuiDataType_::ImGuiDataType_U16, (uint16_t *)data);
+    data += sizeof(uint16_t);
+
+    int64_t sampleDataSize = *(int64_t *)data;
+
+    ImGui::InputScalar("sampleDataSize", ImGuiDataType_::ImGuiDataType_S64, (int64_t *)data);
+    data += sizeof(int64_t);
+
+    ImGui::InputScalar("unknown", ImGuiDataType_::ImGuiDataType_S64, (int64_t *)data);
+    data += sizeof(int64_t);
+
+    uint64_t stagedQDelI = 0;
+    for (uint8_t *headerData = data + sampleDataSize + boneSymbolCount * sizeof(uint64_t); headerData < node->data.dynamicBuffer + node->dataSize; headerData += 4)
+    {
+        ImGui::Text("ActiveSample");
+        float currentHeader = *(float *)headerData;
+
+        float bufferFloat = (float)((uint32_t)currentHeader & 0xffff) * 1.525902e-05 * timeScale;
+        ImGui::InputFloat("unknown", &bufferFloat);
+
+        uint64_t buffer64 = (uint64_t)(((uint32_t)currentHeader >> 10 & 0xfff) >> 2);
+        ImGui::InputScalar("activeSampleIndex", ImGuiDataType_::ImGuiDataType_U64, &buffer64);
+
+        buffer64 = (uint64_t)((uint32_t)currentHeader >> 0x10 & 3);
+        ImGui::InputScalar("vectorIndex", ImGuiDataType_::ImGuiDataType_U64, &buffer64);
+
+        bool option = (int32_t)currentHeader > 0;
+        ImGui::Text("Checked: %s", option ? "true" : "false");
+        ImGui::Checkbox("Abs?", &option);
+
+        option = (uint32_t)currentHeader & 0x40000000;
+        ImGui::Text("Checked: %s", option ? "true" : "false");
+        ImGui::Checkbox("Quaternion?", &option);
+
+        // TODO: Refactor following code
+        if (stagedQDelI++ == 4)
+        {
+            stagedQDelI = 0;
+
+            for (uint32_t i = 0; i < 4; ++i)
+            {
+                uint32_t *vectorData = (uint32_t *)data;
+                if ((uint32_t)currentHeader & 0x40000000) // Quaternion
+                {
+                    float quaternion[4];
+                    if ((int32_t)currentHeader < 0)
+                    {
+                        quaternion[0] = header.minDeltaQ[0] + (float)(vectorData[i] & 0x3ff) * header.scaleDeltaQ[0];
+                        quaternion[1] = header.minDeltaQ[1] + (float)(vectorData[i] >> 10 & 0x7ff) * header.scaleDeltaQ[1];
+                        quaternion[2] = header.minDeltaQ[2] + (float)(vectorData[i] >> 21) * header.scaleDeltaQ[2];
+
+                        data += sizeof(uint32_t) * 4;
+                    }
+                    else
+                    {
+                        quaternion[0] = (float)(((vectorData[i + 4] & 0x3ff) << 10 | vectorData[i] & 0x3ff)) * 1.3487e-06 - 0.7071068; // What the hell are these numbers?
+                        quaternion[1] = (float)(((vectorData[i + 4] >> 10 & 0x7ff) << 11 | vectorData[i] >> 10 & 0x7ff)) * 3.371749e-07 - 0.7071068;
+                        quaternion[2] = (float)(((vectorData[i + 4] >> 21) << 11 | vectorData[i] >> 21)) * 3.371749e-07 - 0.7071068;
+
+                        data += sizeof(uint32_t) * 8;
+                    }
+                    quaternion[3] = ((1.0 - quaternion[0] * quaternion[0]) - quaternion[1] * quaternion[1]) - quaternion[2] * quaternion[2]; // I should have paid attention in math lectures. I need someone to explain this to me
+                    ImGui::InputFloat4("Quaternion", quaternion);
+                }
+                else // Vector
+                {
+                    float vector[3];
+                    if ((int32_t)currentHeader < 0)
+                    {
+                        vector[0] = header.minDeltaV[0] + (float)(vectorData[i] & 0x3ff) * header.scaleDeltaV[0];
+                        vector[1] = header.minDeltaV[1] + (float)(vectorData[i] >> 10 & 0x7ff) * header.scaleDeltaV[1];
+                        vector[2] = header.minDeltaV[2] + (float)(vectorData[i] >> 21) * header.scaleDeltaV[2];
+
+                        data += sizeof(uint32_t) * 4;
+                    }
+                    else
+                    {
+                        vector[0] = header.minVector[0] + (float)(((vectorData[i + 4] & 0x3ff) << 10 | vectorData[i] & 0x3ff)) * header.scaleVector[0];
+                        vector[1] = header.minVector[1] + (float)(((vectorData[i + 4] >> 10 & 0x7ff) << 11 | vectorData[i] >> 10 & 0x7ff)) * header.scaleVector[1];
+                        vector[2] = header.minVector[2] + (float)(((vectorData[i + 4] >> 21) << 11 | vectorData[i] >> 21)) * header.scaleVector[2];
+
+                        data += sizeof(uint32_t) * 8;
+                    }
+                    ImGui::InputFloat3("Vector", vector);
+                }
+            }
+        }
+    }
+
+    return 0;
+}
+
+int T3GFXBufferRender(struct TreeNode *node, uint32_t flags)
+{
+    const char *GFXPlatformResourceUsageEnums[0x8] = {{"eGFXPlatformUsage_Immutable"}, {"eGFXPlatformUsage_Dynamic"}, {"eGFXPlatformUsage_Streaming"}, {"eGFXPlatformUsage_DynamicUnsynchronized"}, {"eGFXPlatformUsage_GPUWritable"}, {"eGFXPlatformUsage_CPUReadStaging"}, {"eGFXPlatformUsage_CPUWriteStaging"}, {"eGFXPlatformUsage_Count"}};
+
+    if (ImGui::BeginCombo("##combo", GFXPlatformResourceUsageEnums[*(uint32_t *)node->data.dynamicBuffer])) // The second parameter is the label previewed before opening the combo.
+    {
+        for (uint32_t i = 0; i < 8; i++)
+        {
+            bool isSelected = (i == *(uint32_t *)node->data.dynamicBuffer); // You can store your selection however you want, outside or inside your objects
+            if (ImGui::Selectable(GFXPlatformResourceUsageEnums[i], isSelected))
+                *(uint32_t *)node->data.dynamicBuffer = i;
+            if (isSelected)
+                ImGui::SetItemDefaultFocus(); // You may set the initial focus when opening the combo (scrolling + for keyboard navigation support)
+        }
+        ImGui::EndCombo();
+    }
+
+    const char *GFXPlatformFormatEnums[0x2c] = {{"eGFXPlatformFormat_None"}, {"eGFXPlatformFormat_F32"}, {"eGFXPlatformFormat_F32x2"}, {"eGFXPlatformFormat_F32x3"}, {"eGFXPlatformFormat_F32x4"}, {"eGFXPlatformFormat_F16x2"}, {"eGFXPlatformFormat_F16x4"}, {"eGFXPlatformFormat_S32"}, {"eGFXPlatformFormat_U32"}, {"eGFXPlatformFormat_S32x2"}, {"eGFXPlatformFormat_U32x2"}, {"eGFXPlatformFormat_S32x3"}, {"eGFXPlatformFormat_U32x3"}, {"eGFXPlatformFormat_S32x4"}, {"eGFXPlatformFormat_U32x4"}, {"eGFXPlatformFormat_S16"}, {"eGFXPlatformFormat_U16"}, {"eGFXPlatformFormat_S16x2"}, {"eGFXPlatformFormat_U16x2"}, {"eGFXPlatformFormat_S16x4"}, {"eGFXPlatformFormat_U16x4"}, {"eGFXPlatformFormat_SN16"}, {"eGFXPlatformFormat_UN16"}, {"eGFXPlatformFormat_SN16x2"}, {"eGFXPlatformFormat_UN16x2"}, {"eGFXPlatformFormat_SN16x4"}, {"eGFXPlatformFormat_UN16x4"}, {"eGFXPlatformFormat_S8"}, {"eGFXPlatformFormat_U8"}, {"eGFXPlatformFormat_S8x2"}, {"eGFXPlatformFormat_U8x2"}, {"eGFXPlatformFormat_S8x4"}, {"eGFXPlatformFormat_U8x4"}, {"eGFXPlatformFormat_SN8"}, {"eGFXPlatformFormat_UN8"}, {"eGFXPlatformFormat_SN8x2"}, {"eGFXPlatformFormat_UN8x2"}, {"eGFXPlatformFormat_SN8x4"}, {"eGFXPlatformFormat_UN8x4"}, {"eGFXPlatformFormat_SN10_SN11_SN11"}, {"eGFXPlatformFormat_SN10x3_SN2"}, {"eGFXPlatformFormat_UN10x3_UN2"}, {"eGFXPlatformFormat_D3DCOLOR"}, {"eGFXPlatformFormat_Count"}};
+
+    if (ImGui::BeginCombo("##combo2", GFXPlatformFormatEnums[*(uint32_t *)(node->data.dynamicBuffer + sizeof(uint32_t))])) // The second parameter is the label previewed before opening the combo.
+    {
+        for (uint32_t i = 0; i < 0x2c; i++)
+        {
+            bool isSelected = (i == *(uint32_t *)(node->data.dynamicBuffer + sizeof(uint32_t))); // You can store your selection however you want, outside or inside your objects
+            if (ImGui::Selectable(GFXPlatformFormatEnums[i], isSelected))
+                *(uint32_t *)(node->data.dynamicBuffer + sizeof(uint32_t)) = i;
+            if (isSelected)
+                ImGui::SetItemDefaultFocus(); // You may set the initial focus when opening the combo (scrolling + for keyboard navigation support)
+        }
+        ImGui::EndCombo();
+    }
+
+    const char *memberNames[0x3] = {{"bufferUsage"}, {"count"}, {"stride"}};
+
+    for (uint32_t i = 2; i < node->dataSize / sizeof(uint32_t); ++i)
+    {
+        ImGui::InputScalar(memberNames[i - 2], ImGuiDataType_::ImGuiDataType_U32, (uint32_t *)(node->data.dynamicBuffer) + i);
+    }
+
+    return 0;
+}
+
+int GFXPlatformAttributeParamsRender(struct TreeNode *node, uint32_t flags)
+{
+    const char *GFXPlatformVertexAttributeEnums[0x9] = {{"eGFXPlatformAttribute_Position"}, {"eGFXPlatformAttribute_Normal"}, {"eGFXPlatformAttribute_Tangent"}, {"eGFXPlatformAttribute_BlendWeight"}, {"eGFXPlatformAttribute_BlendIndex"}, {"eGFXPlatformAttribute_Color"}, {"eGFXPlatformAttribute_TexCoord"}, {"eGFXPlatformAttribute_Count"}, {"eGFXPlatformAttribute_None"}};
+
+    if (*(int32_t *)node->data.dynamicBuffer == -1)
+    {
+        *(uint32_t *)node->data.dynamicBuffer = 9;
+    }
+    if (ImGui::BeginCombo("##combo", GFXPlatformVertexAttributeEnums[*(uint32_t *)node->data.dynamicBuffer])) // The second parameter is the label previewed before opening the combo.
+    {
+        for (uint32_t i = 0; i < 9; i++)
+        {
+            bool isSelected = (i == *(uint32_t *)node->data.dynamicBuffer); // You can store your selection however you want, outside or inside your objects
+            if (ImGui::Selectable(GFXPlatformVertexAttributeEnums[i], isSelected))
+                if (*(uint32_t *)node->data.dynamicBuffer == 9)
+                {
+                    *(int32_t *)node->data.dynamicBuffer = -1;
+                }
+                else
+                {
+                    *(uint32_t *)node->data.dynamicBuffer = i;
+                }
+            if (isSelected)
+                ImGui::SetItemDefaultFocus(); // You may set the initial focus when opening the combo (scrolling + for keyboard navigation support)
+        }
+        ImGui::EndCombo();
+    }
+
+    const char *GFXPlatformFormatEnums[0x2c] = {{"eGFXPlatformFormat_None"}, {"eGFXPlatformFormat_F32"}, {"eGFXPlatformFormat_F32x2"}, {"eGFXPlatformFormat_F32x3"}, {"eGFXPlatformFormat_F32x4"}, {"eGFXPlatformFormat_F16x2"}, {"eGFXPlatformFormat_F16x4"}, {"eGFXPlatformFormat_S32"}, {"eGFXPlatformFormat_U32"}, {"eGFXPlatformFormat_S32x2"}, {"eGFXPlatformFormat_U32x2"}, {"eGFXPlatformFormat_S32x3"}, {"eGFXPlatformFormat_U32x3"}, {"eGFXPlatformFormat_S32x4"}, {"eGFXPlatformFormat_U32x4"}, {"eGFXPlatformFormat_S16"}, {"eGFXPlatformFormat_U16"}, {"eGFXPlatformFormat_S16x2"}, {"eGFXPlatformFormat_U16x2"}, {"eGFXPlatformFormat_S16x4"}, {"eGFXPlatformFormat_U16x4"}, {"eGFXPlatformFormat_SN16"}, {"eGFXPlatformFormat_UN16"}, {"eGFXPlatformFormat_SN16x2"}, {"eGFXPlatformFormat_UN16x2"}, {"eGFXPlatformFormat_SN16x4"}, {"eGFXPlatformFormat_UN16x4"}, {"eGFXPlatformFormat_S8"}, {"eGFXPlatformFormat_U8"}, {"eGFXPlatformFormat_S8x2"}, {"eGFXPlatformFormat_U8x2"}, {"eGFXPlatformFormat_S8x4"}, {"eGFXPlatformFormat_U8x4"}, {"eGFXPlatformFormat_SN8"}, {"eGFXPlatformFormat_UN8"}, {"eGFXPlatformFormat_SN8x2"}, {"eGFXPlatformFormat_UN8x2"}, {"eGFXPlatformFormat_SN8x4"}, {"eGFXPlatformFormat_UN8x4"}, {"eGFXPlatformFormat_SN10_SN11_SN11"}, {"eGFXPlatformFormat_SN10x3_SN2"}, {"eGFXPlatformFormat_UN10x3_UN2"}, {"eGFXPlatformFormat_D3DCOLOR"}, {"eGFXPlatformFormat_Count"}};
+
+    if (ImGui::BeginCombo("##combo2", GFXPlatformFormatEnums[*(uint32_t *)(node->data.dynamicBuffer + sizeof(uint32_t))])) // The second parameter is the label previewed before opening the combo.
+    {
+        for (uint32_t i = 0; i < 0x2c; i++)
+        {
+            bool isSelected = (i == *(uint32_t *)(node->data.dynamicBuffer + sizeof(uint32_t))); // You can store your selection however you want, outside or inside your objects
+            if (ImGui::Selectable(GFXPlatformFormatEnums[i], isSelected))
+                *(uint32_t *)(node->data.dynamicBuffer + sizeof(uint32_t)) = i;
+            if (isSelected)
+                ImGui::SetItemDefaultFocus(); // You may set the initial focus when opening the combo (scrolling + for keyboard navigation support)
+        }
+        ImGui::EndCombo();
+    }
+
+    const char *memberNames[0x3] = {{"attributeIndex"}, {"bufferIndex"}, {"bufferOffset"}};
+
+    for (uint32_t i = 2; i < node->dataSize / sizeof(uint32_t); ++i)
+    {
+        ImGui::InputScalar(memberNames[i - 2], ImGuiDataType_::ImGuiDataType_U32, (uint32_t *)(node->data.dynamicBuffer) + i);
+    }
+
+    return 0;
+}
+
+int T3MeshTextureIndicesRender(struct TreeNode *node, uint32_t flags)
+{
+    if (node->dataSize <= 8)
+    {
+        ImGui::Text("Empty");
+        return 0;
+    }
+
+    for (uint32_t i = 0; i < (node->dataSize / (2 * sizeof(uint32_t))) - 1; ++i)
+    {
+        for (uint32_t j = 0; j < (node->dataSize / (2 * sizeof(uint32_t))) - 1; ++j)
+        {
+            if (*((uint32_t *)node->data.dynamicBuffer + j * 2) == i)
+            {
+                ImGui::InputScalar("input int", ImGuiDataType_::ImGuiDataType_S32, ((uint32_t *)node->data.dynamicBuffer + j * 2 + 1));
+            }
+        }
+    }
+
+    return 0;
 }
 
 int SymbolRender(struct TreeNode *node, uint32_t flags)
@@ -168,6 +435,11 @@ int StringRender(struct TreeNode *node, uint32_t flags)
     }
     return 0;
     // return ImGui::InputText("String", (char *)(node->data.dynamicBuffer + 4), *(uint32_t *)(node->data.dynamicBuffer));
+}
+
+int Vector2Render(struct TreeNode *node, uint32_t flags)
+{
+    return ImGui::InputFloat2("xy", (float *)(node->data.staticBuffer));
 }
 
 int Vector3Render(struct TreeNode *node, uint32_t flags)
@@ -386,7 +658,7 @@ void DlgApplication::OnFrame(float deltaTime)
         {
             name = node->data->description->name;
         }
-        ImGui::Text(name);
+        ImGui::Text("%s", name);
         if (node->prevPin != nullptr)
         {
             ed::BeginPin((uint64_t)node->prevPin, ed::PinKind::Input);
