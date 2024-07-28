@@ -86,6 +86,79 @@ int s64Render(struct TreeNode *node, uint32_t flags)
     return ImGui::InputScalar("input int", ImGuiDataType_::ImGuiDataType_S64, (int64_t *)node->data.staticBuffer);
 }
 
+int T3MaterialStaticParameterRender(struct TreeNode *node, uint32_t flags)
+{
+    const char *fileName = getFileName(*(uint64_t *)node->data.dynamicBuffer);
+    char fileNameBuffer[256] = {0};
+    char hexBuffer[19];
+    snprintf(hexBuffer, sizeof(hexBuffer), "0x%016" PRIX64, *(uint64_t *)node->data.dynamicBuffer);
+
+    if (fileName != NULL)
+    {
+        memcpy(fileNameBuffer, fileName, strlen(fileName) + 1);
+    }
+
+    bool textIsInput = ImGui::InputText("nameSymbol - String", fileNameBuffer, 256);
+    bool hexIsInput = ImGui::InputText("nameSymbol - Hex", hexBuffer, 19);
+    if (hexIsInput)
+    {
+        sscanf(hexBuffer + 2, "%16" PRIX64, (uint64_t *)(node->data.dynamicBuffer));
+    }
+
+    if (textIsInput)
+    {
+        *(uint64_t *)(node->data.dynamicBuffer) = CRC64_CaseInsensitive(0, (uint8_t *)fileNameBuffer);
+    }
+
+    ImGui::InputScalar("nestedMaterialIndex", ImGuiDataType_::ImGuiDataType_S32, (int32_t *)node->data.dynamicBuffer + 2);
+
+    return 0;
+}
+
+int T3MaterialPreShaderRender(struct TreeNode *node, uint32_t flags)
+{
+    ImGui::InputScalar("valueType", ImGuiDataType_::ImGuiDataType_S32, (int32_t *)node->data.dynamicBuffer);
+    ImGui::InputScalar("flags", ImGuiDataType_::ImGuiDataType_U32, (uint32_t *)node->data.dynamicBuffer + 1);
+    ImGui::InputScalar("preShaderOffset", ImGuiDataType_::ImGuiDataType_S32, (int32_t *)node->data.dynamicBuffer + 2);
+    ImGui::InputScalar("scalarParameterOffset", ImGuiDataType_::ImGuiDataType_S32, (int32_t *)node->data.dynamicBuffer + 3);
+
+    return 0;
+}
+
+int T3MaterialParameterRender(struct TreeNode *node, uint32_t flags)
+{
+    const char *fileName = getFileName(*(uint64_t *)node->data.dynamicBuffer);
+    char fileNameBuffer[256] = {0};
+    char hexBuffer[19];
+    snprintf(hexBuffer, sizeof(hexBuffer), "0x%016" PRIX64, *(uint64_t *)node->data.dynamicBuffer);
+
+    if (fileName != NULL)
+    {
+        memcpy(fileNameBuffer, fileName, strlen(fileName) + 1);
+    }
+
+    bool textIsInput = ImGui::InputText("nameSymbol - String", fileNameBuffer, 256);
+    bool hexIsInput = ImGui::InputText("nameSymbol - Hex", hexBuffer, 19);
+    if (hexIsInput)
+    {
+        sscanf(hexBuffer + 2, "%16" PRIX64, (uint64_t *)(node->data.dynamicBuffer));
+    }
+
+    if (textIsInput)
+    {
+        *(uint64_t *)(node->data.dynamicBuffer) = CRC64_CaseInsensitive(0, (uint8_t *)fileNameBuffer);
+    }
+
+    ImGui::InputScalar("propertyType", ImGuiDataType_::ImGuiDataType_S32, (int32_t *)node->data.dynamicBuffer + 2);
+    ImGui::InputScalar("valueType", ImGuiDataType_::ImGuiDataType_S32, (int32_t *)node->data.dynamicBuffer + 3);
+    ImGui::InputScalar("flags", ImGuiDataType_::ImGuiDataType_U32, (uint32_t *)node->data.dynamicBuffer + 4);
+    ImGui::InputScalar("scalarOffset", ImGuiDataType_::ImGuiDataType_S32, (int32_t *)node->data.dynamicBuffer + 5);
+    ImGui::InputScalar("preShaderScalarOffset", ImGuiDataType_::ImGuiDataType_S32, (int32_t *)node->data.dynamicBuffer + 6);
+    ImGui::InputScalar("nestedMaterialIndex", ImGuiDataType_::ImGuiDataType_S32, (int32_t *)node->data.dynamicBuffer + 7);
+
+    return 0;
+};
+
 struct CompressedSkeletonPoseKeys2Header
 {
     float minDeltaV[3];
@@ -134,8 +207,9 @@ int CompressedSkeletonPoseKeys2Render(struct TreeNode *node, uint32_t flags)
     data += 3 * sizeof(float);
 
     float timeScale = *(float *)data;
+    // printf("timeScale: %f\n", timeScale);
 
-    ImGui::InputFloat("unknown", (float *)data);
+    ImGui::InputFloat("timeScale", (float *)data);
     data += sizeof(float);
 
     uint16_t boneSymbolCount = *(uint16_t *)data;
@@ -154,17 +228,27 @@ int CompressedSkeletonPoseKeys2Render(struct TreeNode *node, uint32_t flags)
     ImGui::InputScalar("unknown", ImGuiDataType_::ImGuiDataType_S64, (int64_t *)data);
     data += sizeof(int64_t);
 
-    uint64_t stagedQDelI = 0;
-    for (uint8_t *headerData = data + sampleDataSize + boneSymbolCount * sizeof(uint64_t); headerData < node->data.dynamicBuffer + node->dataSize; headerData += 4)
+    uint64_t stagedQDelI = 4;
+    uint64_t stagedVDelI = 4;
+    uint64_t stagedQAbsI = 4;
+    uint64_t stagedVAbsI = 4;
+
+    uint64_t *boneSymbols = (uint64_t *)(data + sampleDataSize);
+    uint32_t headerCount = 0;
+    for (uint8_t *headerData = data + sampleDataSize + boneSymbolCount * sizeof(uint64_t); headerData < node->data.dynamicBuffer + node->dataSize; headerData += sizeof(float))
     {
+        ++headerCount;
         ImGui::Text("ActiveSample");
-        float currentHeader = *(float *)headerData;
+        uint32_t currentHeader = *(uint32_t *)headerData;
 
-        float bufferFloat = (float)((uint32_t)currentHeader & 0xffff) * 1.525902e-05 * timeScale;
-        ImGui::InputFloat("unknown", &bufferFloat);
+        float bufferFloat = (float)(currentHeader & 0xffff) * 1.525902e-05 * timeScale;
+        ImGui::InputFloat("time", &bufferFloat);
 
-        uint64_t buffer64 = (uint64_t)(((uint32_t)currentHeader >> 10 & 0xfff) >> 2);
-        ImGui::InputScalar("activeSampleIndex", ImGuiDataType_::ImGuiDataType_U64, &buffer64);
+        uint64_t boneIndex = (uint64_t)((currentHeader >> 0x10) & 0xfff);
+        ImGui::InputScalar("boneIndex", ImGuiDataType_::ImGuiDataType_U64, &boneIndex);
+
+        uint64_t buffer64 = boneSymbols[boneIndex];
+        ImGui::InputScalar("boneSymbol", ImGuiDataType_::ImGuiDataType_U64, &buffer64);
 
         buffer64 = (uint64_t)((uint32_t)currentHeader >> 0x10 & 3);
         ImGui::InputScalar("vectorIndex", ImGuiDataType_::ImGuiDataType_U64, &buffer64);
@@ -178,59 +262,99 @@ int CompressedSkeletonPoseKeys2Render(struct TreeNode *node, uint32_t flags)
         ImGui::Checkbox("Quaternion?", &option);
 
         // TODO: Refactor following code
-        if (stagedQDelI++ == 4)
+
+        for (uint32_t i = 0; i < 4; ++i)
         {
-            stagedQDelI = 0;
-
-            for (uint32_t i = 0; i < 4; ++i)
+            uint32_t *vectorData = (uint32_t *)data;
+            if ((uint32_t)currentHeader & 0x40000000) // Quaternion
             {
-                uint32_t *vectorData = (uint32_t *)data;
-                if ((uint32_t)currentHeader & 0x40000000) // Quaternion
+                float quaternion[4];
+                if ((int32_t)currentHeader < 0)
                 {
-                    float quaternion[4];
-                    if ((int32_t)currentHeader < 0)
+                    if (i == 0)
                     {
-                        quaternion[0] = header.minDeltaQ[0] + (float)(vectorData[i] & 0x3ff) * header.scaleDeltaQ[0];
-                        quaternion[1] = header.minDeltaQ[1] + (float)(vectorData[i] >> 10 & 0x7ff) * header.scaleDeltaQ[1];
-                        quaternion[2] = header.minDeltaQ[2] + (float)(vectorData[i] >> 21) * header.scaleDeltaQ[2];
+                        if (stagedQDelI++ != 4)
+                        {
+                            break;
+                        }
+                        stagedQDelI = 0;
+                    }
 
+                    quaternion[0] = header.minDeltaQ[0] + (float)(vectorData[i] & 0x3ff) * header.scaleDeltaQ[0];
+                    quaternion[1] = header.minDeltaQ[1] + (float)(vectorData[i] >> 10 & 0x7ff) * header.scaleDeltaQ[1];
+                    quaternion[2] = header.minDeltaQ[2] + (float)(vectorData[i] >> 21) * header.scaleDeltaQ[2];
+
+                    data += sizeof(uint32_t);
+                }
+                else
+                {
+                    if (i == 0)
+                    {
+                        if (stagedQAbsI++ != 4)
+                        {
+                            break;
+                        }
+                        stagedQAbsI = 0;
+                    }
+                    quaternion[0] = (float)(((vectorData[i + 4] & 0x3ff) << 10 | vectorData[i] & 0x3ff)) * 1.3487e-06 - 0.7071068; // What the hell are these numbers?
+                    quaternion[1] = (float)(((vectorData[i + 4] >> 10 & 0x7ff) << 11 | vectorData[i] >> 10 & 0x7ff)) * 3.371749e-07 - 0.7071068;
+                    quaternion[2] = (float)(((vectorData[i + 4] >> 21) << 11 | vectorData[i] >> 21)) * 3.371749e-07 - 0.7071068;
+
+                    data += sizeof(uint32_t);
+
+                    if (i == 3)
+                    {
                         data += sizeof(uint32_t) * 4;
                     }
-                    else
-                    {
-                        quaternion[0] = (float)(((vectorData[i + 4] & 0x3ff) << 10 | vectorData[i] & 0x3ff)) * 1.3487e-06 - 0.7071068; // What the hell are these numbers?
-                        quaternion[1] = (float)(((vectorData[i + 4] >> 10 & 0x7ff) << 11 | vectorData[i] >> 10 & 0x7ff)) * 3.371749e-07 - 0.7071068;
-                        quaternion[2] = (float)(((vectorData[i + 4] >> 21) << 11 | vectorData[i] >> 21)) * 3.371749e-07 - 0.7071068;
-
-                        data += sizeof(uint32_t) * 8;
-                    }
-                    quaternion[3] = ((1.0 - quaternion[0] * quaternion[0]) - quaternion[1] * quaternion[1]) - quaternion[2] * quaternion[2]; // I should have paid attention in math lectures. I need someone to explain this to me
-                    ImGui::InputFloat4("Quaternion", quaternion);
                 }
-                else // Vector
+                quaternion[3] = ((1.0 - quaternion[0] * quaternion[0]) - quaternion[1] * quaternion[1]) - quaternion[2] * quaternion[2]; // I should have paid attention in math lectures. I need someone to explain this to me
+                ImGui::InputFloat4("Quaternion", quaternion);
+            }
+            else // Vector
+            {
+                float vector[3];
+                if ((int32_t)currentHeader < 0)
                 {
-                    float vector[3];
-                    if ((int32_t)currentHeader < 0)
+                    if (i == 0)
                     {
-                        vector[0] = header.minDeltaV[0] + (float)(vectorData[i] & 0x3ff) * header.scaleDeltaV[0];
-                        vector[1] = header.minDeltaV[1] + (float)(vectorData[i] >> 10 & 0x7ff) * header.scaleDeltaV[1];
-                        vector[2] = header.minDeltaV[2] + (float)(vectorData[i] >> 21) * header.scaleDeltaV[2];
+                        if (stagedVDelI++ != 4)
+                        {
+                            break;
+                        }
+                        stagedVDelI = 0;
+                    }
+                    vector[0] = header.minDeltaV[0] + (float)(vectorData[i] & 0x3ff) * header.scaleDeltaV[0];
+                    vector[1] = header.minDeltaV[1] + (float)(vectorData[i] >> 10 & 0x7ff) * header.scaleDeltaV[1];
+                    vector[2] = header.minDeltaV[2] + (float)(vectorData[i] >> 21) * header.scaleDeltaV[2];
 
+                    data += sizeof(uint32_t);
+                }
+                else
+                {
+                    if (i == 0)
+                    {
+                        if (stagedVAbsI++ != 4)
+                        {
+                            break;
+                        }
+                        stagedVAbsI = 0;
+                    }
+                    vector[0] = header.minVector[0] + (float)(((vectorData[i + 4] & 0x3ff) << 10 | vectorData[i] & 0x3ff)) * header.scaleVector[0];
+                    vector[1] = header.minVector[1] + (float)(((vectorData[i + 4] >> 10 & 0x7ff) << 11 | vectorData[i] >> 10 & 0x7ff)) * header.scaleVector[1];
+                    vector[2] = header.minVector[2] + (float)(((vectorData[i + 4] >> 21) << 11 | vectorData[i] >> 21)) * header.scaleVector[2];
+
+                    data += sizeof(uint32_t);
+
+                    if (i == 3)
+                    {
                         data += sizeof(uint32_t) * 4;
                     }
-                    else
-                    {
-                        vector[0] = header.minVector[0] + (float)(((vectorData[i + 4] & 0x3ff) << 10 | vectorData[i] & 0x3ff)) * header.scaleVector[0];
-                        vector[1] = header.minVector[1] + (float)(((vectorData[i + 4] >> 10 & 0x7ff) << 11 | vectorData[i] >> 10 & 0x7ff)) * header.scaleVector[1];
-                        vector[2] = header.minVector[2] + (float)(((vectorData[i + 4] >> 21) << 11 | vectorData[i] >> 21)) * header.scaleVector[2];
-
-                        data += sizeof(uint32_t) * 8;
-                    }
-                    ImGui::InputFloat3("Vector", vector);
                 }
+                ImGui::InputFloat3("Vector", vector);
             }
         }
     }
+    printf("%d , %d\n", headerCount, boneSymbolCount);
 
     return 0;
 }
@@ -355,9 +479,13 @@ int T3MeshTextureIndicesRender(struct TreeNode *node, uint32_t flags)
 int SymbolRender(struct TreeNode *node, uint32_t flags)
 {
     const char *fileName = getFileName(*(uint64_t *)node->data.staticBuffer);
+    if (fileName == NULL)
+    {
+        fileName = getString(*(uint64_t *)node->data.staticBuffer);
+    }
     char fileNameBuffer[256] = {0};
     char hexBuffer[19];
-    snprintf(hexBuffer, 19, "0x%016" PRIX64, *(uint64_t *)node->data.staticBuffer);
+    snprintf(hexBuffer, sizeof(hexBuffer), "0x%016" PRIX64, *(uint64_t *)node->data.staticBuffer);
 
     if (fileName != NULL)
     {

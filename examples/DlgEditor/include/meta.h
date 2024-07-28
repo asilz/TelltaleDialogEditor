@@ -22,3 +22,4 @@ const struct MetaClassDescription *getMetaClassDescriptionBySymbol(uint64_t symb
 const struct MetaClassDescription *getMetaClassDescriptionByIndex(uint16_t index);
 void readMetaStreamHeader(FILE *stream, struct MetaStreamHeader *header);
 const char *getFileName(uint64_t symbol);
+const char *getString(uint64_t symbol);
