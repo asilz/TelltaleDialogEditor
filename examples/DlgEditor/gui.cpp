@@ -967,6 +967,7 @@ GeneralApplication::GeneralApplication(const char *name, const char *extension, 
         exit(-1);
     }
     description->read(inputStream, &(this->data), 0);
+    data.description = description;
     fclose(inputStream);
 }
 
