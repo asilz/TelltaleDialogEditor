@@ -1213,7 +1213,7 @@ int DlgNodeCancelChoicesRead(FILE *stream, struct TreeNode *node, uint32_t flags
 
 int DlgNodeWaitRead(FILE *stream, struct TreeNode *node, uint32_t flags)
 {
-    printf("DlgNodeWaitRead\n");
+    // printf("DlgNodeWaitRead\n");
 
     node->childCount = 2;
     node->children = malloc(node->childCount * sizeof(struct TreeNode *));

@@ -23,6 +23,7 @@ if(UNIX)
         style.c
         sprite.c
         animation.c
+        keyframe.c
     )
 endif(UNIX)
 
@@ -49,6 +50,7 @@ if(MSVC)
         style.c
         sprite.c
         animation.c
+        keyframe.c
     )
 endif(MSVC)
 

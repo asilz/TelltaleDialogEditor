@@ -132,3 +132,8 @@ int DCArray_Handle_PropertySet__Read(FILE *stream, struct TreeNode *node, uint32
 {
     return genericArrayRead(stream, node, flags, getMetaClassDescriptionByIndex(Handle_PropertySet_));
 }
+
+int Map_StringPropertySetless_String__Read(FILE *stream, struct TreeNode *node, uint32_t flags)
+{
+    return genericMapRead(stream, node, flags, getMetaClassDescriptionByIndex(String), getMetaClassDescriptionByIndex(PropertySet));
+}
