@@ -7,6 +7,7 @@
 #endif
 
 EXTERNC int SymbolRender(struct TreeNode *node, uint32_t flags);
+EXTERNC int FlagsRender(struct TreeNode *node, uint32_t flags);
 EXTERNC int FloatRender(struct TreeNode *node, uint32_t flags);
 EXTERNC int BoolRender(struct TreeNode *node, uint32_t flags);
 EXTERNC int StringRender(struct TreeNode *node, uint32_t flags);

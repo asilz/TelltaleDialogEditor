@@ -30,68 +30,68 @@ extern "C"
 
 int BoolRender(struct TreeNode *node, uint32_t flags)
 {
-    bool option = (bool)(*(node->data.staticBuffer) - '0');
+    bool option = (bool)(*(node->staticBuffer) - '0');
     ImGui::Text("Checked: %s", option ? "true" : "false");
     ImGui::Checkbox("Option 1", &option);
-    *(node->data.staticBuffer) = (uint8_t)(option) + '0';
+    *(node->staticBuffer) = (uint8_t)(option) + '0';
     // printf("%d\n", option);
     return 0;
 }
 
 int FloatRender(struct TreeNode *node, uint32_t flags)
 {
-    float f0 = *(float *)(node->data.staticBuffer);
+    float f0 = *(float *)(node->staticBuffer);
     ImGui::InputFloat("input float", &f0, 0.01f, 1.0f, "%.3f");
-    *(float *)(node->data.staticBuffer) = f0;
+    *(float *)(node->staticBuffer) = f0;
     return 0;
 }
 
 int u8Render(struct TreeNode *node, uint32_t flags)
 {
-    return ImGui::InputScalar("input int", ImGuiDataType_::ImGuiDataType_U8, (uint8_t *)node->data.staticBuffer);
+    return ImGui::InputScalar("input int", ImGuiDataType_::ImGuiDataType_U8, (uint8_t *)node->staticBuffer);
 }
 
 int s8Render(struct TreeNode *node, uint32_t flags)
 {
-    return ImGui::InputScalar("input int", ImGuiDataType_::ImGuiDataType_S8, (int8_t *)node->data.staticBuffer);
+    return ImGui::InputScalar("input int", ImGuiDataType_::ImGuiDataType_S8, (int8_t *)node->staticBuffer);
 }
 
 int u16Render(struct TreeNode *node, uint32_t flags)
 {
-    return ImGui::InputScalar("input int", ImGuiDataType_::ImGuiDataType_U16, (uint16_t *)node->data.staticBuffer);
+    return ImGui::InputScalar("input int", ImGuiDataType_::ImGuiDataType_U16, (uint16_t *)node->staticBuffer);
 }
 
 int s16Render(struct TreeNode *node, uint32_t flags)
 {
-    return ImGui::InputScalar("input int", ImGuiDataType_::ImGuiDataType_S16, (int16_t *)node->data.staticBuffer);
+    return ImGui::InputScalar("input int", ImGuiDataType_::ImGuiDataType_S16, (int16_t *)node->staticBuffer);
 }
 
 int u32Render(struct TreeNode *node, uint32_t flags)
 {
-    return ImGui::InputScalar("input int", ImGuiDataType_::ImGuiDataType_U32, (uint32_t *)node->data.staticBuffer);
+    return ImGui::InputScalar("input int", ImGuiDataType_::ImGuiDataType_U32, (uint32_t *)node->staticBuffer);
 }
 
 int s32Render(struct TreeNode *node, uint32_t flags)
 {
-    return ImGui::InputScalar("input int", ImGuiDataType_::ImGuiDataType_S32, (int32_t *)node->data.staticBuffer);
+    return ImGui::InputScalar("input int", ImGuiDataType_::ImGuiDataType_S32, (int32_t *)node->staticBuffer);
 }
 
 int u64Render(struct TreeNode *node, uint32_t flags)
 {
-    return ImGui::InputScalar("input int", ImGuiDataType_::ImGuiDataType_U64, (uint64_t *)node->data.staticBuffer);
+    return ImGui::InputScalar("input int", ImGuiDataType_::ImGuiDataType_U64, (uint64_t *)node->staticBuffer);
 }
 
 int s64Render(struct TreeNode *node, uint32_t flags)
 {
-    return ImGui::InputScalar("input int", ImGuiDataType_::ImGuiDataType_S64, (int64_t *)node->data.staticBuffer);
+    return ImGui::InputScalar("input int", ImGuiDataType_::ImGuiDataType_S64, (int64_t *)node->staticBuffer);
 }
 
 int T3MaterialStaticParameterRender(struct TreeNode *node, uint32_t flags)
 {
-    const char *fileName = getFileName(*(uint64_t *)node->data.dynamicBuffer);
+    const char *fileName = getFileName(*(uint64_t *)node->dynamicBuffer);
     char fileNameBuffer[256] = {0};
     char hexBuffer[19];
-    snprintf(hexBuffer, sizeof(hexBuffer), "0x%016" PRIX64, *(uint64_t *)node->data.dynamicBuffer);
+    snprintf(hexBuffer, sizeof(hexBuffer), "0x%016" PRIX64, *(uint64_t *)node->dynamicBuffer);
 
     if (fileName != NULL)
     {
@@ -102,35 +102,35 @@ int T3MaterialStaticParameterRender(struct TreeNode *node, uint32_t flags)
     bool hexIsInput = ImGui::InputText("nameSymbol - Hex", hexBuffer, 19);
     if (hexIsInput)
     {
-        sscanf(hexBuffer + 2, "%16" PRIX64, (uint64_t *)(node->data.dynamicBuffer));
+        sscanf(hexBuffer + 2, "%16" PRIX64, (uint64_t *)(node->dynamicBuffer));
     }
 
     if (textIsInput)
     {
-        *(uint64_t *)(node->data.dynamicBuffer) = CRC64_CaseInsensitive(0, (uint8_t *)fileNameBuffer);
+        *(uint64_t *)(node->dynamicBuffer) = CRC64_CaseInsensitive(0, (uint8_t *)fileNameBuffer);
     }
 
-    ImGui::InputScalar("nestedMaterialIndex", ImGuiDataType_::ImGuiDataType_S32, (int32_t *)node->data.dynamicBuffer + 2);
+    ImGui::InputScalar("nestedMaterialIndex", ImGuiDataType_::ImGuiDataType_S32, (int32_t *)node->dynamicBuffer + 2);
 
     return 0;
 }
 
 int T3MaterialPreShaderRender(struct TreeNode *node, uint32_t flags)
 {
-    ImGui::InputScalar("valueType", ImGuiDataType_::ImGuiDataType_S32, (int32_t *)node->data.dynamicBuffer);
-    ImGui::InputScalar("flags", ImGuiDataType_::ImGuiDataType_U32, (uint32_t *)node->data.dynamicBuffer + 1);
-    ImGui::InputScalar("preShaderOffset", ImGuiDataType_::ImGuiDataType_S32, (int32_t *)node->data.dynamicBuffer + 2);
-    ImGui::InputScalar("scalarParameterOffset", ImGuiDataType_::ImGuiDataType_S32, (int32_t *)node->data.dynamicBuffer + 3);
+    ImGui::InputScalar("valueType", ImGuiDataType_::ImGuiDataType_S32, (int32_t *)node->dynamicBuffer);
+    ImGui::InputScalar("flags", ImGuiDataType_::ImGuiDataType_U32, (uint32_t *)node->dynamicBuffer + 1);
+    ImGui::InputScalar("preShaderOffset", ImGuiDataType_::ImGuiDataType_S32, (int32_t *)node->dynamicBuffer + 2);
+    ImGui::InputScalar("scalarParameterOffset", ImGuiDataType_::ImGuiDataType_S32, (int32_t *)node->dynamicBuffer + 3);
 
     return 0;
 }
 
 int T3MaterialParameterRender(struct TreeNode *node, uint32_t flags)
 {
-    const char *fileName = getFileName(*(uint64_t *)node->data.dynamicBuffer);
+    const char *fileName = getFileName(*(uint64_t *)node->dynamicBuffer);
     char fileNameBuffer[256] = {0};
     char hexBuffer[19];
-    snprintf(hexBuffer, sizeof(hexBuffer), "0x%016" PRIX64, *(uint64_t *)node->data.dynamicBuffer);
+    snprintf(hexBuffer, sizeof(hexBuffer), "0x%016" PRIX64, *(uint64_t *)node->dynamicBuffer);
 
     if (fileName != NULL)
     {
@@ -141,20 +141,20 @@ int T3MaterialParameterRender(struct TreeNode *node, uint32_t flags)
     bool hexIsInput = ImGui::InputText("nameSymbol - Hex", hexBuffer, 19);
     if (hexIsInput)
     {
-        sscanf(hexBuffer + 2, "%16" PRIX64, (uint64_t *)(node->data.dynamicBuffer));
+        sscanf(hexBuffer + 2, "%16" PRIX64, (uint64_t *)(node->dynamicBuffer));
     }
 
     if (textIsInput)
     {
-        *(uint64_t *)(node->data.dynamicBuffer) = CRC64_CaseInsensitive(0, (uint8_t *)fileNameBuffer);
+        *(uint64_t *)(node->dynamicBuffer) = CRC64_CaseInsensitive(0, (uint8_t *)fileNameBuffer);
     }
 
-    ImGui::InputScalar("propertyType", ImGuiDataType_::ImGuiDataType_S32, (int32_t *)node->data.dynamicBuffer + 2);
-    ImGui::InputScalar("valueType", ImGuiDataType_::ImGuiDataType_S32, (int32_t *)node->data.dynamicBuffer + 3);
-    ImGui::InputScalar("flags", ImGuiDataType_::ImGuiDataType_U32, (uint32_t *)node->data.dynamicBuffer + 4);
-    ImGui::InputScalar("scalarOffset", ImGuiDataType_::ImGuiDataType_S32, (int32_t *)node->data.dynamicBuffer + 5);
-    ImGui::InputScalar("preShaderScalarOffset", ImGuiDataType_::ImGuiDataType_S32, (int32_t *)node->data.dynamicBuffer + 6);
-    ImGui::InputScalar("nestedMaterialIndex", ImGuiDataType_::ImGuiDataType_S32, (int32_t *)node->data.dynamicBuffer + 7);
+    ImGui::InputScalar("propertyType", ImGuiDataType_::ImGuiDataType_S32, (int32_t *)node->dynamicBuffer + 2);
+    ImGui::InputScalar("valueType", ImGuiDataType_::ImGuiDataType_S32, (int32_t *)node->dynamicBuffer + 3);
+    ImGui::InputScalar("flags", ImGuiDataType_::ImGuiDataType_U32, (uint32_t *)node->dynamicBuffer + 4);
+    ImGui::InputScalar("scalarOffset", ImGuiDataType_::ImGuiDataType_S32, (int32_t *)node->dynamicBuffer + 5);
+    ImGui::InputScalar("preShaderScalarOffset", ImGuiDataType_::ImGuiDataType_S32, (int32_t *)node->dynamicBuffer + 6);
+    ImGui::InputScalar("nestedMaterialIndex", ImGuiDataType_::ImGuiDataType_S32, (int32_t *)node->dynamicBuffer + 7);
 
     return 0;
 };
@@ -171,7 +171,7 @@ struct CompressedSkeletonPoseKeys2Header
 
 int CompressedSkeletonPoseKeys2Render(struct TreeNode *node, uint32_t flags)
 {
-    uint8_t *data = node->data.dynamicBuffer + sizeof(uint32_t);
+    uint8_t *data = node->dynamicBuffer + sizeof(uint32_t);
 
     struct CompressedSkeletonPoseKeys2Header header = *(struct CompressedSkeletonPoseKeys2Header *)data;
     header.scaleVector[0] = header.scaleVector[0] * 9.536752e-07;
@@ -235,7 +235,7 @@ int CompressedSkeletonPoseKeys2Render(struct TreeNode *node, uint32_t flags)
 
     uint64_t *boneSymbols = (uint64_t *)(data + sampleDataSize);
     uint32_t headerCount = 0;
-    for (uint8_t *headerData = data + sampleDataSize + boneSymbolCount * sizeof(uint64_t); headerData < node->data.dynamicBuffer + node->dataSize; headerData += sizeof(float))
+    for (uint8_t *headerData = data + sampleDataSize + boneSymbolCount * sizeof(uint64_t); headerData < node->dynamicBuffer + node->dataSize; headerData += sizeof(float))
     {
         ++headerCount;
         ImGui::Text("ActiveSample");
@@ -363,13 +363,13 @@ int T3GFXBufferRender(struct TreeNode *node, uint32_t flags)
 {
     const char *GFXPlatformResourceUsageEnums[0x8] = {{"eGFXPlatformUsage_Immutable"}, {"eGFXPlatformUsage_Dynamic"}, {"eGFXPlatformUsage_Streaming"}, {"eGFXPlatformUsage_DynamicUnsynchronized"}, {"eGFXPlatformUsage_GPUWritable"}, {"eGFXPlatformUsage_CPUReadStaging"}, {"eGFXPlatformUsage_CPUWriteStaging"}, {"eGFXPlatformUsage_Count"}};
 
-    if (ImGui::BeginCombo("##combo", GFXPlatformResourceUsageEnums[*(uint32_t *)node->data.dynamicBuffer])) // The second parameter is the label previewed before opening the combo.
+    if (ImGui::BeginCombo("##combo", GFXPlatformResourceUsageEnums[*(uint32_t *)node->dynamicBuffer])) // The second parameter is the label previewed before opening the combo.
     {
         for (uint32_t i = 0; i < 8; i++)
         {
-            bool isSelected = (i == *(uint32_t *)node->data.dynamicBuffer); // You can store your selection however you want, outside or inside your objects
+            bool isSelected = (i == *(uint32_t *)node->dynamicBuffer); // You can store your selection however you want, outside or inside your objects
             if (ImGui::Selectable(GFXPlatformResourceUsageEnums[i], isSelected))
-                *(uint32_t *)node->data.dynamicBuffer = i;
+                *(uint32_t *)node->dynamicBuffer = i;
             if (isSelected)
                 ImGui::SetItemDefaultFocus(); // You may set the initial focus when opening the combo (scrolling + for keyboard navigation support)
         }
@@ -378,13 +378,13 @@ int T3GFXBufferRender(struct TreeNode *node, uint32_t flags)
 
     const char *GFXPlatformFormatEnums[0x2c] = {{"eGFXPlatformFormat_None"}, {"eGFXPlatformFormat_F32"}, {"eGFXPlatformFormat_F32x2"}, {"eGFXPlatformFormat_F32x3"}, {"eGFXPlatformFormat_F32x4"}, {"eGFXPlatformFormat_F16x2"}, {"eGFXPlatformFormat_F16x4"}, {"eGFXPlatformFormat_S32"}, {"eGFXPlatformFormat_U32"}, {"eGFXPlatformFormat_S32x2"}, {"eGFXPlatformFormat_U32x2"}, {"eGFXPlatformFormat_S32x3"}, {"eGFXPlatformFormat_U32x3"}, {"eGFXPlatformFormat_S32x4"}, {"eGFXPlatformFormat_U32x4"}, {"eGFXPlatformFormat_S16"}, {"eGFXPlatformFormat_U16"}, {"eGFXPlatformFormat_S16x2"}, {"eGFXPlatformFormat_U16x2"}, {"eGFXPlatformFormat_S16x4"}, {"eGFXPlatformFormat_U16x4"}, {"eGFXPlatformFormat_SN16"}, {"eGFXPlatformFormat_UN16"}, {"eGFXPlatformFormat_SN16x2"}, {"eGFXPlatformFormat_UN16x2"}, {"eGFXPlatformFormat_SN16x4"}, {"eGFXPlatformFormat_UN16x4"}, {"eGFXPlatformFormat_S8"}, {"eGFXPlatformFormat_U8"}, {"eGFXPlatformFormat_S8x2"}, {"eGFXPlatformFormat_U8x2"}, {"eGFXPlatformFormat_S8x4"}, {"eGFXPlatformFormat_U8x4"}, {"eGFXPlatformFormat_SN8"}, {"eGFXPlatformFormat_UN8"}, {"eGFXPlatformFormat_SN8x2"}, {"eGFXPlatformFormat_UN8x2"}, {"eGFXPlatformFormat_SN8x4"}, {"eGFXPlatformFormat_UN8x4"}, {"eGFXPlatformFormat_SN10_SN11_SN11"}, {"eGFXPlatformFormat_SN10x3_SN2"}, {"eGFXPlatformFormat_UN10x3_UN2"}, {"eGFXPlatformFormat_D3DCOLOR"}, {"eGFXPlatformFormat_Count"}};
 
-    if (ImGui::BeginCombo("##combo2", GFXPlatformFormatEnums[*(uint32_t *)(node->data.dynamicBuffer + sizeof(uint32_t))])) // The second parameter is the label previewed before opening the combo.
+    if (ImGui::BeginCombo("##combo2", GFXPlatformFormatEnums[*(uint32_t *)(node->dynamicBuffer + sizeof(uint32_t))])) // The second parameter is the label previewed before opening the combo.
     {
         for (uint32_t i = 0; i < 0x2c; i++)
         {
-            bool isSelected = (i == *(uint32_t *)(node->data.dynamicBuffer + sizeof(uint32_t))); // You can store your selection however you want, outside or inside your objects
+            bool isSelected = (i == *(uint32_t *)(node->dynamicBuffer + sizeof(uint32_t))); // You can store your selection however you want, outside or inside your objects
             if (ImGui::Selectable(GFXPlatformFormatEnums[i], isSelected))
-                *(uint32_t *)(node->data.dynamicBuffer + sizeof(uint32_t)) = i;
+                *(uint32_t *)(node->dynamicBuffer + sizeof(uint32_t)) = i;
             if (isSelected)
                 ImGui::SetItemDefaultFocus(); // You may set the initial focus when opening the combo (scrolling + for keyboard navigation support)
         }
@@ -395,7 +395,7 @@ int T3GFXBufferRender(struct TreeNode *node, uint32_t flags)
 
     for (uint32_t i = 2; i < node->dataSize / sizeof(uint32_t); ++i)
     {
-        ImGui::InputScalar(memberNames[i - 2], ImGuiDataType_::ImGuiDataType_U32, (uint32_t *)(node->data.dynamicBuffer) + i);
+        ImGui::InputScalar(memberNames[i - 2], ImGuiDataType_::ImGuiDataType_U32, (uint32_t *)(node->dynamicBuffer) + i);
     }
 
     return 0;
@@ -405,23 +405,23 @@ int GFXPlatformAttributeParamsRender(struct TreeNode *node, uint32_t flags)
 {
     const char *GFXPlatformVertexAttributeEnums[0x9] = {{"eGFXPlatformAttribute_Position"}, {"eGFXPlatformAttribute_Normal"}, {"eGFXPlatformAttribute_Tangent"}, {"eGFXPlatformAttribute_BlendWeight"}, {"eGFXPlatformAttribute_BlendIndex"}, {"eGFXPlatformAttribute_Color"}, {"eGFXPlatformAttribute_TexCoord"}, {"eGFXPlatformAttribute_Count"}, {"eGFXPlatformAttribute_None"}};
 
-    if (*(int32_t *)node->data.dynamicBuffer == -1)
+    if (*(int32_t *)node->dynamicBuffer == -1)
     {
-        *(uint32_t *)node->data.dynamicBuffer = 9;
+        *(uint32_t *)node->dynamicBuffer = 9;
     }
-    if (ImGui::BeginCombo("##combo", GFXPlatformVertexAttributeEnums[*(uint32_t *)node->data.dynamicBuffer])) // The second parameter is the label previewed before opening the combo.
+    if (ImGui::BeginCombo("##combo", GFXPlatformVertexAttributeEnums[*(uint32_t *)node->dynamicBuffer])) // The second parameter is the label previewed before opening the combo.
     {
         for (uint32_t i = 0; i < 9; i++)
         {
-            bool isSelected = (i == *(uint32_t *)node->data.dynamicBuffer); // You can store your selection however you want, outside or inside your objects
+            bool isSelected = (i == *(uint32_t *)node->dynamicBuffer); // You can store your selection however you want, outside or inside your objects
             if (ImGui::Selectable(GFXPlatformVertexAttributeEnums[i], isSelected))
-                if (*(uint32_t *)node->data.dynamicBuffer == 9)
+                if (*(uint32_t *)node->dynamicBuffer == 9)
                 {
-                    *(int32_t *)node->data.dynamicBuffer = -1;
+                    *(int32_t *)node->dynamicBuffer = -1;
                 }
                 else
                 {
-                    *(uint32_t *)node->data.dynamicBuffer = i;
+                    *(uint32_t *)node->dynamicBuffer = i;
                 }
             if (isSelected)
                 ImGui::SetItemDefaultFocus(); // You may set the initial focus when opening the combo (scrolling + for keyboard navigation support)
@@ -431,13 +431,13 @@ int GFXPlatformAttributeParamsRender(struct TreeNode *node, uint32_t flags)
 
     const char *GFXPlatformFormatEnums[0x2c] = {{"eGFXPlatformFormat_None"}, {"eGFXPlatformFormat_F32"}, {"eGFXPlatformFormat_F32x2"}, {"eGFXPlatformFormat_F32x3"}, {"eGFXPlatformFormat_F32x4"}, {"eGFXPlatformFormat_F16x2"}, {"eGFXPlatformFormat_F16x4"}, {"eGFXPlatformFormat_S32"}, {"eGFXPlatformFormat_U32"}, {"eGFXPlatformFormat_S32x2"}, {"eGFXPlatformFormat_U32x2"}, {"eGFXPlatformFormat_S32x3"}, {"eGFXPlatformFormat_U32x3"}, {"eGFXPlatformFormat_S32x4"}, {"eGFXPlatformFormat_U32x4"}, {"eGFXPlatformFormat_S16"}, {"eGFXPlatformFormat_U16"}, {"eGFXPlatformFormat_S16x2"}, {"eGFXPlatformFormat_U16x2"}, {"eGFXPlatformFormat_S16x4"}, {"eGFXPlatformFormat_U16x4"}, {"eGFXPlatformFormat_SN16"}, {"eGFXPlatformFormat_UN16"}, {"eGFXPlatformFormat_SN16x2"}, {"eGFXPlatformFormat_UN16x2"}, {"eGFXPlatformFormat_SN16x4"}, {"eGFXPlatformFormat_UN16x4"}, {"eGFXPlatformFormat_S8"}, {"eGFXPlatformFormat_U8"}, {"eGFXPlatformFormat_S8x2"}, {"eGFXPlatformFormat_U8x2"}, {"eGFXPlatformFormat_S8x4"}, {"eGFXPlatformFormat_U8x4"}, {"eGFXPlatformFormat_SN8"}, {"eGFXPlatformFormat_UN8"}, {"eGFXPlatformFormat_SN8x2"}, {"eGFXPlatformFormat_UN8x2"}, {"eGFXPlatformFormat_SN8x4"}, {"eGFXPlatformFormat_UN8x4"}, {"eGFXPlatformFormat_SN10_SN11_SN11"}, {"eGFXPlatformFormat_SN10x3_SN2"}, {"eGFXPlatformFormat_UN10x3_UN2"}, {"eGFXPlatformFormat_D3DCOLOR"}, {"eGFXPlatformFormat_Count"}};
 
-    if (ImGui::BeginCombo("##combo2", GFXPlatformFormatEnums[*(uint32_t *)(node->data.dynamicBuffer + sizeof(uint32_t))])) // The second parameter is the label previewed before opening the combo.
+    if (ImGui::BeginCombo("##combo2", GFXPlatformFormatEnums[*(uint32_t *)(node->dynamicBuffer + sizeof(uint32_t))])) // The second parameter is the label previewed before opening the combo.
     {
         for (uint32_t i = 0; i < 0x2c; i++)
         {
-            bool isSelected = (i == *(uint32_t *)(node->data.dynamicBuffer + sizeof(uint32_t))); // You can store your selection however you want, outside or inside your objects
+            bool isSelected = (i == *(uint32_t *)(node->dynamicBuffer + sizeof(uint32_t))); // You can store your selection however you want, outside or inside your objects
             if (ImGui::Selectable(GFXPlatformFormatEnums[i], isSelected))
-                *(uint32_t *)(node->data.dynamicBuffer + sizeof(uint32_t)) = i;
+                *(uint32_t *)(node->dynamicBuffer + sizeof(uint32_t)) = i;
             if (isSelected)
                 ImGui::SetItemDefaultFocus(); // You may set the initial focus when opening the combo (scrolling + for keyboard navigation support)
         }
@@ -448,7 +448,7 @@ int GFXPlatformAttributeParamsRender(struct TreeNode *node, uint32_t flags)
 
     for (uint32_t i = 2; i < node->dataSize / sizeof(uint32_t); ++i)
     {
-        ImGui::InputScalar(memberNames[i - 2], ImGuiDataType_::ImGuiDataType_U32, (uint32_t *)(node->data.dynamicBuffer) + i);
+        ImGui::InputScalar(memberNames[i - 2], ImGuiDataType_::ImGuiDataType_U32, (uint32_t *)(node->dynamicBuffer) + i);
     }
 
     return 0;
@@ -466,9 +466,9 @@ int T3MeshTextureIndicesRender(struct TreeNode *node, uint32_t flags)
     {
         for (uint32_t j = 0; j < (node->dataSize / (2 * sizeof(uint32_t))) - 1; ++j)
         {
-            if (*((uint32_t *)node->data.dynamicBuffer + j * 2) == i)
+            if (*((uint32_t *)node->dynamicBuffer + j * 2) == i)
             {
-                ImGui::InputScalar("input int", ImGuiDataType_::ImGuiDataType_S32, ((uint32_t *)node->data.dynamicBuffer + j * 2 + 1));
+                ImGui::InputScalar("input int", ImGuiDataType_::ImGuiDataType_S32, ((uint32_t *)node->dynamicBuffer + j * 2 + 1));
             }
         }
     }
@@ -476,16 +476,29 @@ int T3MeshTextureIndicesRender(struct TreeNode *node, uint32_t flags)
     return 0;
 }
 
+int FlagsRender(struct TreeNode *node, uint32_t flags)
+{
+    char hexBuffer[19];
+    snprintf(hexBuffer, sizeof(hexBuffer), "0x%08" PRIX32, *(uint32_t *)node->staticBuffer);
+
+    if (ImGui::InputText("Hex", hexBuffer, 19))
+    {
+        sscanf(hexBuffer + 2, "%8" PRIX32, (uint32_t *)(node->staticBuffer));
+    }
+
+    return 0;
+}
+
 int SymbolRender(struct TreeNode *node, uint32_t flags)
 {
-    const char *fileName = getFileName(*(uint64_t *)node->data.staticBuffer);
+    const char *fileName = getFileName(*(uint64_t *)node->staticBuffer);
     if (fileName == NULL)
     {
-        fileName = getString(*(uint64_t *)node->data.staticBuffer);
+        fileName = getString(*(uint64_t *)node->staticBuffer);
     }
     char fileNameBuffer[256] = {0};
     char hexBuffer[19];
-    snprintf(hexBuffer, sizeof(hexBuffer), "0x%016" PRIX64, *(uint64_t *)node->data.staticBuffer);
+    snprintf(hexBuffer, sizeof(hexBuffer), "0x%016" PRIX64, *(uint64_t *)node->staticBuffer);
 
     if (fileName != NULL)
     {
@@ -496,12 +509,12 @@ int SymbolRender(struct TreeNode *node, uint32_t flags)
     bool hexIsInput = ImGui::InputText("Hex", hexBuffer, 19);
     if (hexIsInput)
     {
-        sscanf(hexBuffer + 2, "%16" PRIX64, (uint64_t *)(node->data.staticBuffer));
+        sscanf(hexBuffer + 2, "%16" PRIX64, (uint64_t *)(node->staticBuffer));
     }
 
     if (textIsInput)
     {
-        *(uint64_t *)(node->data.staticBuffer) = CRC64_CaseInsensitive(0, (uint8_t *)fileNameBuffer);
+        *(uint64_t *)(node->staticBuffer) = CRC64_CaseInsensitive(0, (uint8_t *)fileNameBuffer);
     }
 
     return 0;
@@ -512,7 +525,7 @@ int HandleBaseRender(struct TreeNode *node, uint32_t flags)
     SymbolRender(node, flags);
     if (node->dataSize == 2 * sizeof(uint64_t))
     {
-        ImGui::InputScalar("input int", ImGuiDataType_::ImGuiDataType_S64, node->data.dynamicBuffer + sizeof(uint64_t));
+        ImGui::InputScalar("input int", ImGuiDataType_::ImGuiDataType_S64, node->dynamicBuffer + sizeof(uint64_t));
     }
 
     return 0;
@@ -522,67 +535,67 @@ int StringRender(struct TreeNode *node, uint32_t flags)
 {
     constexpr uint32_t BUFFER_SIZE = 1024;
     char stringBuffer[BUFFER_SIZE];
-    if (node->dataSize <= sizeof(node->data))
+    if (node->dataSize <= sizeof(node->staticBuffer))
     {
-        memcpy(stringBuffer, (char *)(node->data.staticBuffer + 4), node->dataSize - 4);
+        memcpy(stringBuffer, (char *)(node->staticBuffer + 4), node->dataSize - 4);
     }
     else
     {
-        memcpy(stringBuffer, (char *)(node->data.dynamicBuffer + 4), node->dataSize - 4);
+        memcpy(stringBuffer, (char *)(node->dynamicBuffer + 4), node->dataSize - 4);
     }
     stringBuffer[node->dataSize - 4] = '\0';
     ImGui::InputText("String", stringBuffer, BUFFER_SIZE);
     size_t stringLength = strlen(stringBuffer);
-    if (node->dataSize <= sizeof(node->data) && stringLength + 4 > sizeof(node->data))
+    if (node->dataSize <= sizeof(node->staticBuffer) && stringLength + 4 > sizeof(node->staticBuffer))
     {
         node->dataSize = stringLength + 4;
-        node->data.dynamicBuffer = (uint8_t *)malloc(node->dataSize);
-        *(uint32_t *)node->data.dynamicBuffer = stringLength;
-        memcpy(node->data.dynamicBuffer + 4, stringBuffer, stringLength);
+        node->dynamicBuffer = (uint8_t *)malloc(node->dataSize);
+        *(uint32_t *)node->dynamicBuffer = stringLength;
+        memcpy(node->dynamicBuffer + 4, stringBuffer, stringLength);
     }
-    else if (node->dataSize > sizeof(node->data) && stringLength + 4 <= sizeof(node->data))
+    else if (node->dataSize > sizeof(node->staticBuffer) && stringLength + 4 <= sizeof(node->staticBuffer))
     {
         node->dataSize = stringLength + 4;
-        free(node->data.dynamicBuffer);
-        *(uint32_t *)node->data.staticBuffer = stringLength;
-        memcpy(node->data.staticBuffer + 4, stringBuffer, stringLength);
+        free(node->dynamicBuffer);
+        *(uint32_t *)node->staticBuffer = stringLength;
+        memcpy(node->staticBuffer + 4, stringBuffer, stringLength);
     }
-    else if (node->dataSize > sizeof(node->data) && stringLength + 4 > sizeof(node->data))
+    else if (node->dataSize > sizeof(node->staticBuffer) && stringLength + 4 > sizeof(node->staticBuffer))
     {
         node->dataSize = stringLength + 4;
-        free(node->data.dynamicBuffer);
-        node->data.dynamicBuffer = (uint8_t *)malloc(stringLength + 4);
-        *(uint32_t *)node->data.dynamicBuffer = stringLength;
-        memcpy(node->data.dynamicBuffer + 4, stringBuffer, stringLength);
+        free(node->dynamicBuffer);
+        node->dynamicBuffer = (uint8_t *)malloc(stringLength + 4);
+        *(uint32_t *)node->dynamicBuffer = stringLength;
+        memcpy(node->dynamicBuffer + 4, stringBuffer, stringLength);
     }
-    else if (node->dataSize <= sizeof(node->data) && stringLength + 4 <= sizeof(node->data))
+    else if (node->dataSize <= sizeof(node->staticBuffer) && stringLength + 4 <= sizeof(node->staticBuffer))
     {
         node->dataSize = stringLength + 4;
-        *(uint32_t *)node->data.staticBuffer = stringLength;
-        memcpy(node->data.staticBuffer + 4, stringBuffer, stringLength);
+        *(uint32_t *)node->staticBuffer = stringLength;
+        memcpy(node->staticBuffer + 4, stringBuffer, stringLength);
     }
     return 0;
-    // return ImGui::InputText("String", (char *)(node->data.dynamicBuffer + 4), *(uint32_t *)(node->data.dynamicBuffer));
+    // return ImGui::InputText("String", (char *)(node->dynamicBuffer + 4), *(uint32_t *)(node->dynamicBuffer));
 }
 
 int Vector2Render(struct TreeNode *node, uint32_t flags)
 {
-    return ImGui::InputFloat2("xy", (float *)(node->data.staticBuffer));
+    return ImGui::InputFloat2("xy", (float *)(node->staticBuffer));
 }
 
 int Vector3Render(struct TreeNode *node, uint32_t flags)
 {
-    return ImGui::InputFloat3("xyz", (float *)(node->data.dynamicBuffer));
+    return ImGui::InputFloat3("xyz", (float *)(node->dynamicBuffer));
 }
 
 int Vector4Render(struct TreeNode *node, uint32_t flags)
 {
-    return ImGui::InputFloat4("xyzw", (float *)(node->data.dynamicBuffer));
+    return ImGui::InputFloat4("xyzw", (float *)(node->dynamicBuffer));
 }
 
 int ColorRender(struct TreeNode *node, uint32_t flags)
 {
-    return ImGui::ColorPicker4("rgba", (float *)(node->data.dynamicBuffer));
+    return ImGui::ColorPicker4("rgba", (float *)(node->dynamicBuffer));
 }
 
 int renderNode(struct TreeNode *node, int uniqueID, uint32_t flags)
@@ -592,28 +605,33 @@ int renderNode(struct TreeNode *node, int uniqueID, uint32_t flags)
     {
         return node->description->render(node, flags);
     }
-    if (node->childCount == 0)
+    if (node->dataSize > 0 || node->child == NULL)
     {
         ImGui::Text("Render function not implemented, cannot view content");
         return -4;
     }
-    for (uint16_t i = 0; i < node->childCount; ++i)
+    node = node->child;
+    do
     {
-
-        char text[256];
-        const char *name = "(null)";
-        const MetaClassDescription *description = node->children[i]->description;
-        if (node->children[i]->description != NULL)
+        char text[0x400];
+        const char *dataTypeName = "???";
+        const char *memberName = "???";
+        if (node->description != NULL)
         {
-            name = node->children[i]->description->name;
+            dataTypeName = node->description->name;
         }
-        snprintf(text, 256, "%s##%d-%d", name, uniqueID, i);
+        if (node->memberName != NULL)
+        {
+            memberName = node->memberName;
+        }
+        snprintf(text, sizeof(text), "%s %s##%d-%" PRIu64, dataTypeName, memberName, uniqueID, (uint64_t)node);
         if (ImGui::TreeNode(text))
         {
-            renderNode(node->children[i], uniqueID, flags);
+            renderNode(node, uniqueID, flags);
             ImGui::TreePop();
         }
-    }
+        node = node->sibling;
+    } while (node != NULL);
     return 0;
 }
 
@@ -634,49 +652,57 @@ DlgApplication::DlgApplication(const char *name, FILE *inputStream) : Applicatio
 void DlgApplication::CreateLinks()
 {
     /* Iteration through all children in each folder */
-    for (uint32_t i = 1; i < *(uint64_t *)(dlg.children[13]->children[0]->data.staticBuffer); ++i)
+    struct TreeNode *currentDlgFolder = dlg.child->sibling->sibling->sibling->sibling->sibling->sibling->sibling->sibling->sibling->sibling->sibling->sibling->sibling->child->sibling;
+    while (currentDlgFolder != NULL)
     {
-        for (uint32_t j = 1; j < *(uint64_t *)(dlg.children[13]->children[i]->children[2]->children[0]->data.staticBuffer); ++j)
+        struct TreeNode *currentDlgNode = currentDlgFolder->child->sibling->sibling->child->child->sibling;
+        while (currentDlgNode != NULL)
         {
-            TreeNode *child = dlg.children[13]->children[i]->children[2]->children[j];
-            nodes.push_back(new Node{child, nullptr, nullptr});
+            nodes.push_back(new Node{currentDlgNode, nullptr, nullptr});
             AddNextLinks(nodes.back());
+            currentDlgNode = currentDlgNode->sibling;
         }
+        currentDlgFolder = currentDlgFolder->sibling;
     }
 
-    for (uint32_t i = 1; i < *(uint64_t *)(dlg.children[14]->children[0]->data.staticBuffer); ++i)
+    struct TreeNode *node = dlg.child->sibling->sibling->sibling->sibling->sibling->sibling->sibling->sibling->sibling->sibling->sibling->sibling->sibling->sibling->child->sibling;
+    while (node != NULL)
     {
-        TreeNode *node = dlg.children[14]->children[i];
         if (node->description->crc == 0x13998d6f0bde3491) // DlgNodeChoices
         {
-            for (uint32_t j = 1; j < *(uint64_t *)(node->children[1]->children[0]->children[0]->data.staticBuffer); ++j)
+            struct TreeNode *choices = node->child->sibling->child->child->sibling;
+            while (choices != NULL)
             {
-                TreeNode *child = node->children[1]->children[0]->children[j];
-                nodes.push_back(new Node{child, nullptr, nullptr});
+                nodes.push_back(new Node{choices, nullptr, nullptr});
                 AddNextLinks(nodes.back());
+                choices = choices->sibling;
             }
-            for (uint32_t j = 1; j < *(uint64_t *)(node->children[2]->children[0]->children[0]->data.staticBuffer); ++j)
+            choices = node->child->sibling->sibling->child->child->sibling;
+            while (choices != NULL)
             {
-                TreeNode *child = node->children[1]->children[0]->children[j];
-                nodes.push_back(new Node{child, nullptr, nullptr});
+                nodes.push_back(new Node{choices, nullptr, nullptr});
                 AddNextLinks(nodes.back());
+                choices = choices->sibling;
             }
-            for (uint32_t j = 1; j < *(uint64_t *)(node->children[3]->children[0]->children[0]->data.staticBuffer); ++j)
+            choices = node->child->sibling->sibling->sibling->child->child->sibling;
+            while (choices != NULL)
             {
-                TreeNode *child = node->children[1]->children[0]->children[j];
-                nodes.push_back(new Node{child, nullptr, nullptr});
+                nodes.push_back(new Node{choices, nullptr, nullptr});
                 AddNextLinks(nodes.back());
+                choices = choices->sibling;
             }
         }
         else if (node->description->crc == 0x789758cb1a8d6628 || node->description->crc == 0x36e367b48ad63274 || node->description->crc == 0x97ba9139ccc1cf26) // DlgNodeConditional || DlgNodeSequence || DlgNodeParallel
         {
-            for (uint32_t j = 1; j < *(uint64_t *)(node->children[1]->children[0]->children[0]->data.staticBuffer); ++j)
+            struct TreeNode *child = node->child->sibling->child->child->sibling;
+            while (child != NULL)
             {
-                TreeNode *child = node->children[1]->children[0]->children[j];
                 nodes.push_back(new Node{child, nullptr, nullptr});
                 AddNextLinks(nodes.back());
+                child = child->sibling;
             }
         }
+        node = node->sibling;
     }
 }
 
@@ -688,9 +714,9 @@ void DlgApplication::AddNextLinks(Node *node)
     {
         return;
     }
-    for (uint32_t i = 1; i < *(uint64_t *)(dlg.children[14]->children[0]->data.staticBuffer); ++i)
+    struct TreeNode *nextTreeNode = dlg.child->sibling->sibling->sibling->sibling->sibling->sibling->sibling->sibling->sibling->sibling->sibling->sibling->sibling->sibling->child->sibling;
+    while (nextTreeNode->sibling != NULL) // Stops at next to last element since the last element is not a node, but rather a boolean
     {
-        struct TreeNode *nextTreeNode = dlg.children[14]->children[i];
         if (*DlgGetNextID(node->data) == *DlgGetID(nextTreeNode))
         {
             Node *nextNode = new Node{nextTreeNode, nullptr, nullptr};
@@ -703,13 +729,8 @@ void DlgApplication::AddNextLinks(Node *node)
             // this->links.push_back(LinkInfo{&pins[pins.size() - 2], &pins[pins.size() - 1]});
             AddNextLinks(nextNode);
         }
+        nextTreeNode = nextTreeNode->sibling;
     }
-}
-
-void AddMember(struct TreeNode *tree, struct TreeNode *member)
-{
-
-    treePushBack(tree, member);
 }
 
 void DlgApplication::OnStart()
@@ -847,7 +868,7 @@ void DlgApplication::OnFrame(float deltaTime)
 
         if (firstframe)
         {
-            if (node->data->children[0]->description->crc == 0xbfb0ce2bd1f38792)
+            if (node->data->child->description->crc == 0xbfb0ce2bd1f38792) // crc of DlgChild
             {
                 nodeX = 0;
                 nodeY += 400;

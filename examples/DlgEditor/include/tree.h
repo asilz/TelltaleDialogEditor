@@ -2,6 +2,7 @@
 #define TREE_H
 #include <inttypes.h>
 #include <stdio.h>
+#include <stdbool.h>
 
 struct TreeNode;
 
@@ -16,26 +17,35 @@ struct MetaClassDescription
     const RenderFunction render;
 };
 
+struct MetaMemberDescription
+{
+    const char *memberName;
+    uint16_t metaClassDescriptionIndex;
+    uint8_t isBlocked;
+};
+
+/** @struct TreeNode
+ * @brief All telltale data types are serialized into this data structure. Each child represents a member of the data type usually. Which data type is serialized into the node is determined by the description. If the data type is intrinsic, then staticBuffer or dynamicBuffer is used to store the values
+ */
 struct TreeNode
 {
-    union Data
+    union
     {
         uint8_t *dynamicBuffer;
         uint8_t staticBuffer[sizeof(uint8_t *)];
-    } data;
+        struct TreeNode *child;
+    };
+    const char *memberName;
     const struct MetaClassDescription *description;
     struct TreeNode *parent;
-    struct TreeNode **children;
+    struct TreeNode *sibling;
+
     uint32_t dataSize;
-    uint16_t childCount; // Reason I placed members like so is to avoid padding. Padding is the bane of my existence.
     uint8_t isBlocked;
     uint8_t serializeType;
 };
 
 void treeFree(struct TreeNode *root);
-uint32_t writeTree(FILE *stream, struct TreeNode *root);
-void treePushBack(struct TreeNode *tree, struct TreeNode *child);
-struct TreeNode *copyTree(struct TreeNode *tree);
-void treeErase(struct TreeNode *tree, uint16_t childIndex);
+uint32_t writeTree(FILE *stream, const struct TreeNode *root);
 
 #endif

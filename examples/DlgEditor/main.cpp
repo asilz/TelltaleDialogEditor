@@ -50,6 +50,7 @@ int Main(int argc, char **argv)
         }
 
         treeFree(&exampe.dlg);
+        free(exampe.header.crc);
 
         return ret;
     }
@@ -76,6 +77,7 @@ int Main(int argc, char **argv)
         }
 
         treeFree(&exampe.data);
+        free(exampe.header.crc);
 
         return ret;
     }
