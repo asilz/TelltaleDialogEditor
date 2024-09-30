@@ -560,7 +560,7 @@ static const struct MetaClassDescription descriptions[META_CLASS_DESCRIPTIONS_CO
     {0x86DD6FDD80394AB3, "BoneContraints", BoneContraintsRead, NULL},
     {0x8758F70880295F9B, "Handle<SoundAmbience::AmbienceDefinition>", intrinsic8Read, SymbolRender},
     {0x878A3470E047E140, "Map<int,Ptr<DialogDialog>,less<int>>", NULL, NULL},
-    {0x87B6B95067DB12F9, "DlgChildSetConditionalCase", NULL, NULL},
+    {0x87B6B95067DB12F9, "DlgChildSetConditionalCase", DlgChildSetConditionalCaseRead, NULL},
     {0x87E0E880D7D2DFC1, "DlgObjID", intrinsic8Read, SymbolRender},
     {0x880F40C15BF127CC, "InputMapper::RawEvent", NULL, NULL},
     {0x881C335AC79F7149, "DCArray<Color>", NULL, NULL},
