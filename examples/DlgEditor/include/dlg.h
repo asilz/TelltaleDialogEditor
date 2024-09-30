@@ -37,6 +37,7 @@ int DlgChildRead(FILE *stream, struct TreeNode *node, uint32_t flags);
 int DlgChildSetRead(FILE *stream, struct TreeNode *node, uint32_t flags);
 int DlgChildSetChoiceRead(FILE *stream, struct TreeNode *node, uint32_t flags);
 int DlgConditionSetRead(FILE *stream, struct TreeNode *node, uint32_t flags);
+int DlgChildSetConditionalCaseRead(FILE *stream, struct TreeNode *node, uint32_t flags);
 int DlgChainHeadRead(FILE *stream, struct TreeNode *node, uint32_t flags);
 int DlgConditionRead(FILE *stream, struct TreeNode *node, uint32_t flags);
 int DlgChildSetElementRead(FILE *stream, struct TreeNode *node, uint32_t flags);
