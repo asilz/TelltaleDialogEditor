@@ -41,7 +41,7 @@ int ActingOverridablePropOwnerRead(FILE *stream, struct TreeNode *node, uint32_t
 
 static int ActingResourceRead(FILE *stream, struct TreeNode *node, uint32_t flags)
 {
-    const static struct MetaMemberDescription const descriptions[] = {
+    const static struct MetaMemberDescription descriptions[] = {
         {.isBlocked = 1, .memberName = "Baseclass_ActingOverridablePropOwner", .metaClassDescriptionIndex = ActingOverridablePropOwner},
         {.isBlocked = 1, .memberName = "mResource", .metaClassDescriptionIndex = AnimOrChore},
         {.isBlocked = 0, .memberName = "mValidIntensityRange", .metaClassDescriptionIndex = TRange_float_},
@@ -51,11 +51,42 @@ static int ActingResourceRead(FILE *stream, struct TreeNode *node, uint32_t flag
 
 static int ActingPaletteRead(FILE *stream, struct TreeNode *node, uint32_t flags)
 {
-    return 0;
+    const static struct MetaMemberDescription descriptions[] = {
+        {.isBlocked = 1, .memberName = "s_Baseclass_ActingOverridableProp", .metaClassDescriptionIndex = ActingOverridablePropOwner},
+        {.isBlocked = 1, .memberName = "s_Baseclass_UID::Owner", .metaClassDescriptionIndex = UID__Owner},
+        {.isBlocked = 0, .memberName = "s_mName", .metaClassDescriptionIndex = String},
+        {.isBlocked = 0, .memberName = "mVal", .metaClassDescriptionIndex = long_type},
+        {.isBlocked = 1, .memberName = "s_mActiveDuring", .metaClassDescriptionIndex = long_type}, // EnumActiveDuring
+        {.isBlocked = 0, .memberName = "s_mTimeBetweenActions", .metaClassDescriptionIndex = TRange_float_},
+        {.isBlocked = 0, .memberName = "s_mFirstActionDelayRange", .metaClassDescriptionIndex = TRange_float_},
+        {.isBlocked = 0, .memberName = "s_mSpilloutBufPreRange", .metaClassDescriptionIndex = TRange_float_},
+        {.isBlocked = 0, .memberName = "s_mSpilloutBufPostRange", .metaClassDescriptionIndex = TRange_float_},
+        {.isBlocked = 0, .memberName = "s_mLatestStartOffsetRange", .metaClassDescriptionIndex = TRange_float_},
+        {.isBlocked = 0, .memberName = "s_mValidIntensityRange", .metaClassDescriptionIndex = TRange_float_},
+        {.isBlocked = 0, .memberName = "s_mGroupMembershipUID", .metaClassDescriptionIndex = long_type},
+        {.isBlocked = 0, .memberName = "s_mFlags", .metaClassDescriptionIndex = Flags},
+    };
+    return genericRead(stream, node, flags, 13, descriptions);
 }
 
 static int ActingAccentPaletteRead(FILE *stream, struct TreeNode *node, uint32_t flags)
 {
+    const static struct MetaMemberDescription descriptions[] = {
+        {.isBlocked = 1, .memberName = "s_Baseclass_ActingOverridableProp", .metaClassDescriptionIndex = ActingOverridablePropOwner},
+        {.isBlocked = 1, .memberName = "s_Baseclass_UID::Owner", .metaClassDescriptionIndex = UID__Owner},
+        {.isBlocked = 0, .memberName = "s_mName", .metaClassDescriptionIndex = String},
+        {.isBlocked = 0, .memberName = "mVal", .metaClassDescriptionIndex = long_type},
+        {.isBlocked = 1, .memberName = "s_mActiveDuring", .metaClassDescriptionIndex = long_type}, // EnumActiveDuring
+        {.isBlocked = 0, .memberName = "s_mTimeBetweenActions", .metaClassDescriptionIndex = TRange_float_},
+        {.isBlocked = 0, .memberName = "s_mFirstActionDelayRange", .metaClassDescriptionIndex = TRange_float_},
+        {.isBlocked = 0, .memberName = "s_mSpilloutBufPreRange", .metaClassDescriptionIndex = TRange_float_},
+        {.isBlocked = 0, .memberName = "s_mSpilloutBufPostRange", .metaClassDescriptionIndex = TRange_float_},
+        {.isBlocked = 0, .memberName = "s_mLatestStartOffsetRange", .metaClassDescriptionIndex = TRange_float_},
+        {.isBlocked = 0, .memberName = "s_mValidIntensityRange", .metaClassDescriptionIndex = TRange_float_},
+        {.isBlocked = 0, .memberName = "s_mGroupMembershipUID", .metaClassDescriptionIndex = long_type},
+        {.isBlocked = 0, .memberName = "s_mFlags", .metaClassDescriptionIndex = Flags},
+    };
+    return genericRead(stream, node, flags, 13, descriptions);
 
     return 0;
 }
@@ -105,8 +136,17 @@ int DCArray_ActingPaletteClass_Read(FILE *stream, struct TreeNode *node, uint32_
 
 int StyleGuideRead(FILE *stream, struct TreeNode *node, uint32_t flags)
 {
-
-    return 0;
+    const static struct MetaMemberDescription descriptions[] = {
+        {.isBlocked = 1, .memberName = "Baseclass_UID::Generator", .metaClassDescriptionIndex = UID__Generator},
+        {.isBlocked = 1, .memberName = "Baseclass_ActingOverridablePropOwner", .metaClassDescriptionIndex = ActingOverridablePropOwner},
+        {.isBlocked = 0, .memberName = "mDefPaletteClassID", .metaClassDescriptionIndex = long_type},
+        {.isBlocked = 0, .memberName = "mbGeneratesLookAts", .metaClassDescriptionIndex = bool_type},
+        {.isBlocked = 1, .memberName = "mPaletteClassPtrs", .metaClassDescriptionIndex = DCArray_Ptr_ActingPaletteClass__},
+        {.isBlocked = 0, .memberName = "mFlags", .metaClassDescriptionIndex = Flags},
+        {.isBlocked = 1, .memberName = "mPaletteClasses", .metaClassDescriptionIndex = DCArray_ActingPaletteClass_},
+        {.isBlocked = 0, .memberName = "mDefPaletteClassIndex", .metaClassDescriptionIndex = long_type},
+    };
+    return genericRead(stream, node, flags, 8, descriptions);
 }
 
 int ResourceGroupsRead(FILE *stream, struct TreeNode *node, uint32_t flags)

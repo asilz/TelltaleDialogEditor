@@ -23,13 +23,62 @@ void treeFree(struct TreeNode *root)
     }
 }
 
+void morrisFree(struct TreeNode *root)
+{
+    // left is sibling
+    // right is child
+    root = root->child;
+
+    while (root)
+    {
+        if (root->sibling == NULL)
+        {
+            if (root->dataSize > 0)
+            {
+                if (root->dataSize > sizeof(root->staticBuffer))
+                {
+                    free(root->dynamicBuffer);
+                }
+                root->child = NULL;
+            }
+            struct TreeNode *tmp = root;
+            root = root->child;
+            free(tmp);
+        }
+        else
+        {
+            struct TreeNode *current = root->sibling;
+            while (current->child != NULL && current->dataSize == 0 && current->child != root)
+            {
+                current = current->child;
+            }
+
+            if (current->child == NULL || current->dataSize > 0)
+            {
+                current->child = root;
+                root = root->sibling;
+            }
+            else
+            {
+                if (current->child != NULL && current->dataSize > sizeof(root->staticBuffer))
+                {
+                    free(current->dynamicBuffer);
+                }
+                current->child = NULL;
+                current = root->sibling;
+                if (root->dynamicBuffer != NULL && root->dataSize > 8)
+                {
+                    free(root->dynamicBuffer);
+                }
+                free(root);
+                root = current;
+            }
+        }
+    }
+}
+
 uint32_t writeTree(FILE *stream, const struct TreeNode *root)
 {
-    int64_t tell = cftell(stream);
-    if (tell < 0x2ba8 && tell > 0x2b90)
-    {
-        printf("stop\n");
-    }
     if (root->dataSize > 0)
     {
         if (root->dataSize > sizeof(root->staticBuffer))
